@@ -2,7 +2,7 @@
  * @file report-generator.js
  * @description Generates printable reports and summaries for tax filings in India.
  *              Builds structured print layouts that convert clean to PDF via the browser.
- * @version 1.1.0
+ * @version 1.2.0
  * @license MIT
  */
 
@@ -43,7 +43,709 @@
     },
 
     /**
-     * Generate HTML structure for printable tax report (CA audit simulation).
+     * Generate tabular ledger of user inputs and their tax impacts.
+     * @param {Object} userData
+     * @param {string} activeRegime
+     * @returns {string} HTML table
+     */
+    generateInputsLedgerTable: function (userData, activeRegime) {
+      var html = '';
+      var rows = [];
+
+      // 1. Profile inputs
+      if (userData.profile) {
+        rows.push({
+          category: 'Assessee Profile',
+          input: 'Residential Status',
+          value: userData.profile.isResident ? 'Resident Individual' : 'Non-Resident',
+          source: 'Step: Profile > Residential Status',
+          impact: 'Required to determine basic exemption slabs, eligibility for rebate under Sec 87A (Resident only), and deductions.'
+        });
+        rows.push({
+          category: 'Assessee Profile',
+          input: 'Age / Category',
+          value: userData.profile.age + ' Years',
+          source: 'Step: Profile > Age',
+          impact: 'Sets applicable slabs for the Old Tax Regime (below 60 vs senior vs super senior citizen).'
+        });
+      }
+
+      // 2. Salary Income
+      if (userData.selectedIncomes.salary && userData.income.salary) {
+        var sal = userData.income.salary;
+        if (sal.grossSalary > 0) {
+          rows.push({
+            category: 'Schedule S: Salary',
+            input: 'Gross Salary (Annual)',
+            value: window.Utils.formatCurrency(sal.grossSalary),
+            source: 'Step: Salary > Gross Salary',
+            impact: 'Formulates base Gross Income. Standard deduction of ' + (activeRegime === 'new' ? '₹75,000' : '₹50,000') + ' is automatically deducted.'
+          });
+        }
+        if (sal.basic > 0) {
+          rows.push({
+            category: 'Schedule S: Salary',
+            input: 'Basic Salary (Annual)',
+            value: window.Utils.formatCurrency(sal.basic),
+            source: 'Step: Salary > Basic Salary',
+            impact: 'Used to compute statutory ceilings: max HRA exemption (40%/50%) and Section 80CCD(2) employer NPS limit.'
+          });
+        }
+        if (sal.hra > 0) {
+          rows.push({
+            category: 'Schedule S: Salary',
+            input: 'House Rent Allowance (HRA)',
+            value: window.Utils.formatCurrency(sal.hra),
+            source: 'Step: Salary > HRA',
+            impact: 'Eligible for exemption under Section 10(13A) (Old Regime only). Excess HRA is fully taxable.'
+          });
+        }
+        if (sal.da > 0) {
+          rows.push({
+            category: 'Schedule S: Salary',
+            input: 'Dearness Allowance (DA)',
+            value: window.Utils.formatCurrency(sal.da),
+            source: 'Step: Salary > Dearness Allowance',
+            impact: 'Included in basic salary definitions for HRA and NPS limit calculations.'
+          });
+        }
+        if (sal.specialAllowance > 0) {
+          rows.push({
+            category: 'Schedule S: Salary',
+            input: 'Special Allowance',
+            value: window.Utils.formatCurrency(sal.specialAllowance),
+            source: 'Step: Salary > Special Allowance',
+            impact: 'Fully taxable salary allowance; increases progressive slab income.'
+          });
+        }
+      }
+
+      // 3. House Property Income
+      if (userData.selectedIncomes.property && userData.income.houseProperty && userData.income.houseProperty.length > 0) {
+        for (var i = 0; i < userData.income.houseProperty.length; i++) {
+          var prop = userData.income.houseProperty[i];
+          var propLabel = 'Property #' + (i + 1) + ' (' + (prop.type === 'selfOccupied' ? 'Self Occupied' : 'Let Out') + ')';
+          if (prop.type === 'letOut') {
+            rows.push({
+              category: 'Schedule HP: House Property',
+              input: propLabel + ' - Annual Rent',
+              value: window.Utils.formatCurrency(prop.annualRent),
+              source: 'Step: House Property > Rent Received',
+              impact: 'Forms Net Annual Value (NAV) after deducting municipal taxes. A 30% flat standard deduction is applied under Sec 24(a).'
+            });
+            if (prop.municipalTax > 0) {
+              rows.push({
+                category: 'Schedule HP: House Property',
+                input: propLabel + ' - Municipal Taxes paid',
+                value: window.Utils.formatCurrency(prop.municipalTax),
+                source: 'Step: House Property > Municipal Taxes',
+                impact: 'Deducted from gross annual rent to determine Net Annual Value (NAV).'
+              });
+            }
+          }
+          if (prop.interestOnLoan > 0) {
+            rows.push({
+              category: 'Schedule HP: House Property',
+              input: propLabel + ' - Home Loan Interest paid',
+              value: window.Utils.formatCurrency(prop.interestOnLoan),
+              source: 'Step: House Property > Interest paid',
+              impact: prop.type === 'selfOccupied' 
+                ? 'Deductible up to ₹2,00,000 under Sec 24(b) (Old Regime only). Restricted to ₹0 in New Regime.' 
+                : 'Fully deductible from let-out rental income under Sec 24(b). Net losses can set off against other heads up to ₹2,00,000 (Old Regime only).'
+            });
+          }
+        }
+      }
+
+      // 4. Capital Gains
+      if (userData.selectedIncomes.gains && userData.income.capitalGains) {
+        var cg = userData.income.capitalGains;
+        if (cg.listed) {
+          if (cg.listed.stcg > 0) {
+            rows.push({
+              category: 'Schedule CG: Capital Gains',
+              input: 'Short-Term Capital Gains (Equity)',
+              value: window.Utils.formatCurrency(cg.listed.stcg),
+              source: 'Step: Capital Gains > STCG Equity',
+              impact: 'Taxed at a flat rate of 20% under Section 111A. Standard slab deductions and rebates do not offset this except under specific low-income slab exhaustion rules.'
+            });
+          }
+          if (cg.listed.ltcg > 0) {
+            rows.push({
+              category: 'Schedule CG: Capital Gains',
+              input: 'Long-Term Capital Gains (Equity)',
+              value: window.Utils.formatCurrency(cg.listed.ltcg),
+              source: 'Step: Capital Gains > LTCG Equity',
+              impact: 'Taxed at flat 12.5% under Section 112A. Eligible for a combined statutory tax exemption on the first ₹1,25,000 of gains.'
+            });
+          }
+        }
+        if (cg.property) {
+          if (cg.property.stcg > 0) {
+            rows.push({
+              category: 'Schedule CG: Capital Gains',
+              input: 'Short-Term Gains (Property)',
+              value: window.Utils.formatCurrency(cg.property.stcg),
+              source: 'Step: Capital Gains > STCG Property',
+              impact: 'Taxed at normal progressive slab rates based on your selected regime.'
+            });
+          }
+          if (cg.property.ltcg > 0) {
+            rows.push({
+              category: 'Schedule CG: Capital Gains',
+              input: 'Long-Term Gains (Property)',
+              value: window.Utils.formatCurrency(cg.property.ltcg),
+              source: 'Step: Capital Gains > LTCG Property',
+              impact: 'Taxed at a flat rate of 12.5% without indexation (Budget 2024 revised rules).'
+            });
+          }
+        }
+        if (cg.gold) {
+          if (cg.gold.stcg > 0) {
+            rows.push({
+              category: 'Schedule CG: Capital Gains',
+              input: 'Short-Term Gains (Gold)',
+              value: window.Utils.formatCurrency(cg.gold.stcg),
+              source: 'Step: Capital Gains > STCG Gold',
+              impact: 'Taxed at progressive slab rates.'
+            });
+          }
+          if (cg.gold.ltcg > 0) {
+            rows.push({
+              category: 'Schedule CG: Capital Gains',
+              input: 'Long-Term Gains (Gold)',
+              value: window.Utils.formatCurrency(cg.gold.ltcg),
+              source: 'Step: Capital Gains > LTCG Gold',
+              impact: 'Taxed at a flat rate of 12.5% under Section 112.'
+            });
+          }
+        }
+        if (cg.debt && cg.debt.gains > 0) {
+          rows.push({
+            category: 'Schedule CG: Capital Gains',
+            input: 'Debt Mutual Fund Gains',
+            value: window.Utils.formatCurrency(cg.debt.gains),
+            source: 'Step: Capital Gains > Debt Funds',
+            impact: 'Classified strictly as Short-Term Capital Gains under Section 50AA; taxed at progressive slab rates.'
+          });
+        }
+      }
+
+      // 5. Business Income
+      if (userData.selectedIncomes.business && userData.income.business) {
+        var biz = userData.income.business;
+        if (biz.type !== 'none') {
+          rows.push({
+            category: 'Schedule BP: Business',
+            input: 'Filing Type / Scheme',
+            value: biz.type === 'regular' ? 'Regular Bookkeeping' : 'Presumptive Taxation (' + biz.type + ')',
+            source: 'Step: Business > Scheme selection',
+            impact: biz.type === 'regular'
+              ? 'Taxable net profit is calculated as gross receipts minus allowed business expenses and WDV depreciation.'
+              : 'Taxable income is calculated as a statutory flat percentage of turnover, exempting you from maintaining formal audit logs under Section 44AA.'
+          });
+          if (biz.turnover > 0) {
+            rows.push({
+              category: 'Schedule BP: Business',
+              input: 'Gross Turnover / Receipts',
+              value: window.Utils.formatCurrency(biz.turnover),
+              source: 'Step: Business > Gross Turnover',
+              impact: 'Represents the base business scale. Deemed profit rates are calculated based on digital vs cash components.'
+            });
+          }
+          if (biz.cashTurnover > 0) {
+            rows.push({
+              category: 'Schedule BP: Business',
+              input: 'Cash Receipts portion',
+              value: window.Utils.formatCurrency(biz.cashTurnover),
+              source: 'Step: Business > Cash Turnover',
+              impact: 'For presumptive schemes (44AD), cash portion is taxed at a higher deemed rate (8%) compared to digital receipts (6%).'
+            });
+          }
+          if (biz.expenses > 0 && biz.type === 'regular') {
+            rows.push({
+              category: 'Schedule BP: Business',
+              input: 'Business Expenses',
+              value: window.Utils.formatCurrency(biz.expenses),
+              source: 'Step: Business > Total Expenses',
+              impact: 'Deducted directly from business revenue to determine net profit.'
+            });
+          }
+        }
+      }
+
+      // 6. Other Sources
+      if (userData.selectedIncomes.other && userData.income.otherSources) {
+        var os = userData.income.otherSources;
+        if (os.savingsInterest > 0) {
+          rows.push({
+            category: 'Schedule OS: Other Sources',
+            input: 'Savings Bank Interest',
+            value: window.Utils.formatCurrency(os.savingsInterest),
+            source: 'Step: Other Income > Savings Interest',
+            impact: 'Taxable under slab rates. Eligible for deduction up to ₹10,000 under Sec 80TTA (non-seniors) or ₹50,000 under Sec 80TTB (seniors).'
+          });
+        }
+        if (os.fdInterest > 0) {
+          rows.push({
+            category: 'Schedule OS: Other Sources',
+            input: 'FD/Post-office Interest',
+            value: window.Utils.formatCurrency(os.fdInterest),
+            source: 'Step: Other Income > FD Interest',
+            impact: 'Taxable under progressive slab rates. Seniors can deduct combined FD & savings interest up to ₹50,000 under Sec 80TTB.'
+          });
+        }
+        if (os.dividends > 0) {
+          rows.push({
+            category: 'Schedule OS: Other Sources',
+            input: 'Dividend Income',
+            value: window.Utils.formatCurrency(os.dividends),
+            source: 'Step: Other Income > Dividends',
+            impact: 'Fully taxable at normal progressive slab rates.'
+          });
+        }
+        if (os.lottery > 0) {
+          rows.push({
+            category: 'Schedule OS: Other Sources',
+            input: 'Lottery/Winnings (Net)',
+            value: window.Utils.formatCurrency(os.lottery),
+            source: 'Step: Other Income > Winnings',
+            impact: 'Taxed at a flat rate of 30% under Section 115BBJ. No deductions or slab exemptions are allowed against this.'
+          });
+        }
+        if (os.other > 0) {
+          rows.push({
+            category: 'Schedule OS: Other Sources',
+            input: 'Miscellaneous Other Income',
+            value: window.Utils.formatCurrency(os.other),
+            source: 'Step: Other Income > Other Misc',
+            impact: 'Taxed at normal progressive slab rates.'
+          });
+        }
+      }
+
+      // 7. Deductions
+      if (userData.deductions) {
+        var deds = userData.deductions;
+        var directDeds = [
+          { key: '80C', label: 'Sec 80C (PPF/ELSS/EPF/Principal)' },
+          { key: '80CCC', label: 'Sec 80CCC (Pension funds)' },
+          { key: '80CCD1', label: 'Sec 80CCD(1) (Employee NPS)' },
+          { key: '80CCD1B', label: 'Sec 80CCD(1B) (Additional NPS)' },
+          { key: '80CCD2', label: 'Sec 80CCD(2) (Employer NPS)' },
+          { key: '80D_self', label: 'Sec 80D (Health Premium Self)' },
+          { key: '80D_parents', label: 'Sec 80D (Health Premium Parents)' },
+          { key: '80E', label: 'Sec 80E (Education Loan Interest)' },
+          { key: '80G', label: 'Sec 80G (Donations)' },
+          { key: '80TTA', label: 'Sec 80TTA (Savings Interest Ded)' },
+          { key: '80TTB', label: 'Sec 80TTB (Deposit Interest Ded)' },
+          { key: '80U', label: 'Sec 80U (Own Disability Ded)' },
+          { key: '80DD', label: 'Sec 80DD (Disabled Dependent)' },
+          { key: '80DDB', label: 'Sec 80DDB (Medical Treatment)' }
+        ];
+
+        for (var d = 0; d < directDeds.length; d++) {
+          var val = Number(deds[directDeds[d].key] || 0);
+          if (val > 0) {
+            var activeImpact = '';
+            if (activeRegime === 'new') {
+              if (directDeds[d].key === '80CCD2') {
+                activeImpact = 'Deducted directly from Gross Total Income (up to 14% of Basic).';
+              } else {
+                activeImpact = 'Ineligible under New Regime (disallowed under Sec 115BAC). Net tax impact is zero.';
+              }
+            } else {
+              activeImpact = 'Reduces Net Taxable Slab Income directly (subject to statutory section caps).';
+            }
+
+            rows.push({
+              category: 'Schedule VIA: Deductions',
+              input: directDeds[d].label,
+              value: window.Utils.formatCurrency(val),
+              source: 'Step: Deductions > ' + directDeds[d].key,
+              impact: activeImpact
+            });
+          }
+        }
+        if (deds['80GG'] && Number(deds['80GG'].rentPaid || 0) > 0) {
+          rows.push({
+            category: 'Schedule VIA: Deductions',
+            input: 'Sec 80GG (Rent Paid - No HRA)',
+            value: window.Utils.formatCurrency(deds['80GG'].rentPaid),
+            source: 'Step: Deductions > 80GG Rent',
+            impact: activeRegime === 'new' 
+              ? 'Disallowed under New Regime.' 
+              : 'Reduces Net Taxable Slab Income based on minimum of rent rule thresholds.'
+          });
+        }
+      }
+
+      // 8. Taxes Paid
+      if (userData.taxesPaid) {
+        var tp = userData.taxesPaid;
+        if (Number(tp.tds || 0) > 0) {
+          rows.push({
+            category: 'Taxes Pre-Paid',
+            input: 'Tax Deducted at Source (TDS/TCS)',
+            value: window.Utils.formatCurrency(tp.tds),
+            source: 'Step: Taxes Paid > TDS',
+            impact: 'Credited directly against computed Net Tax Liability. Reduces final tax payable or increases refund.'
+          });
+        }
+        if (Number(tp.advanceTax || 0) > 0) {
+          rows.push({
+            category: 'Taxes Pre-Paid',
+            input: 'Advance Tax Paid',
+            value: window.Utils.formatCurrency(tp.advanceTax),
+            source: 'Step: Taxes Paid > Advance Tax',
+            impact: 'Directly offsets tax liability. Prevents interest penalty charges under Sections 234B/234C.'
+          });
+        }
+        if (Number(tp.selfAssessment || 0) > 0) {
+          rows.push({
+            category: 'Taxes Pre-Paid',
+            input: 'Self-Assessment Tax Paid',
+            value: window.Utils.formatCurrency(tp.selfAssessment),
+            source: 'Step: Taxes Paid > Self Assessment',
+            impact: 'Offsets final outstanding tax liability before filing return.'
+          });
+        }
+      }
+
+      if (rows.length === 0) {
+        return '<p class="text-muted text-center" style="font-size: 10px; padding: 15px;">No active inputs declared.</p>';
+      }
+
+      html += '<table class="print-table inputs-ledger-table">';
+      html += '  <thead>';
+      html += '    <tr>';
+      html += '      <th style="width: 20%;">Category / Head</th>';
+      html += '      <th style="width: 25%;">Declared Input Parameter</th>';
+      html += '      <th style="width: 15%;" class="text-right">Value (₹)</th>';
+      html += '      <th style="width: 20%;">Source Step</th>';
+      html += '      <th style="width: 20%;">Tax Impact Explanation</th>';
+      html += '    </tr>';
+      html += '  </thead>';
+      html += '  <tbody>';
+
+      for (var r = 0; r < rows.length; r++) {
+        var row = rows[r];
+        html += '    <tr>';
+        html += '      <td><strong>' + row.category + '</strong></td>';
+        html += '      <td>' + row.input + '</td>';
+        html += '      <td class="text-right">' + row.value + '</td>';
+        html += '      <td><span style="font-size: 9px; color: #555;">' + row.source + '</span></td>';
+        html += '      <td style="font-size: 9px; line-height: 1.3; color: #333;">' + row.impact + '</td>';
+        html += '    </tr>';
+      }
+
+      html += '  </tbody>';
+      html += '</table>';
+
+      return html;
+    },
+
+    /**
+     * Generate step-by-step slab calculation table.
+     * @param {number} taxableIncome
+     * @param {string} activeRegime
+     * @param {string} ageCategory
+     * @returns {string} HTML table
+     */
+    generateDetailedSlabCalculationTable: function (taxableIncome, activeRegime, ageCategory) {
+      var slabs = [];
+      if (activeRegime === 'new') {
+        slabs = TD.newRegime.slabs;
+      } else {
+        slabs = window.TaxEngine.getOldRegimeSlabs(ageCategory);
+      }
+
+      var html = '';
+      html += '<table class="print-table slab-computation-table">';
+      html += '  <thead>';
+      html += '    <tr>';
+      html += '      <th>Tax Slab Bracket (₹)</th>';
+      html += '      <th class="text-right">Tax Rate</th>';
+      html += '      <th class="text-right">Taxable Income in Slab (₹)</th>';
+      html += '      <th class="text-right">Tax Computed in Slab (₹)</th>';
+      html += '      <th>Calculation Formula</th>';
+      html += '    </tr>';
+      html += '  </thead>';
+      html += '  <tbody>';
+
+      var totalSlabTax = 0;
+
+      for (var i = 0; i < slabs.length; i++) {
+        var slab = slabs[i];
+        var rangeText = '';
+        if (slab.max === Infinity) {
+          rangeText = 'Above ' + window.Utils.formatCurrency(slab.min);
+        } else {
+          rangeText = '₹' + (slab.min === 0 ? '0' : window.Utils.formatCurrency(slab.min + 1)) + ' to ₹' + window.Utils.formatCurrency(slab.max);
+        }
+
+        var rateText = (slab.rate * 100).toFixed(0) + '%';
+        var taxableInSlab = 0;
+        var slabTax = 0;
+        var formula = '';
+
+        if (taxableIncome > slab.min) {
+          taxableInSlab = Math.min(taxableIncome, slab.max) - slab.min;
+          slabTax = taxableInSlab * slab.rate;
+          totalSlabTax += slabTax;
+          
+          if (slab.rate === 0) {
+            formula = 'Exempt';
+          } else {
+            formula = '₹' + window.Utils.formatCurrency(taxableInSlab) + ' × ' + rateText;
+          }
+        } else {
+          taxableInSlab = 0;
+          slabTax = 0;
+          formula = 'Income below slab';
+        }
+
+        html += '    <tr>';
+        html += '      <td>' + rangeText + '</td>';
+        html += '      <td class="text-right">' + rateText + '</td>';
+        html += '      <td class="text-right">' + window.Utils.formatCurrency(taxableInSlab) + '</td>';
+        html += '      <td class="text-right">' + window.Utils.formatCurrency(slabTax) + '</td>';
+        html += '      <td style="font-size: 9px; color: #444;">' + formula + '</td>';
+        html += '    </tr>';
+      }
+
+      html += '    <tr class="total-row">';
+      html += '      <td colspan="2"><strong>Aggregated Slab Tax</strong></td>';
+      html += '      <td class="text-right"><strong>' + window.Utils.formatCurrency(taxableIncome) + '</strong></td>';
+      html += '      <td class="text-right"><strong>' + window.Utils.formatCurrency(Math.round(totalSlabTax * 100) / 100) + '</strong></td>';
+      html += '      <td>Sum of progressive slab rates</td>';
+      html += '    </tr>';
+      html += '  </tbody>';
+      html += '</table>';
+
+      return html;
+    },
+
+    /**
+     * Generate dynamic document checklist based on active headers.
+     * @param {Object} userData
+     * @param {string} activeRegime
+     * @param {Object} heads
+     * @returns {string} HTML table
+     */
+    generateDetailedChecklist: function (userData, activeRegime, heads) {
+      var html = '';
+      var rows = [];
+
+      // 1. Base files always required
+      rows.push({
+        schedule: 'General / All',
+        docName: 'Form 26AS & AIS / TIS Summary',
+        issuer: 'Income Tax Department (incometax.gov.in)',
+        auditAction: 'Reconcile all taxable income and TDS entries with the IT Department\'s records to prevent mismatched tax credit demands.',
+        instruction: 'Cross-reference interest income, dividend entries, and employer TDS credits. Report discrepancies via the feedback portal.'
+      });
+
+      // 2. Salary Schedule S
+      if (heads.salaryGross > 0) {
+        rows.push({
+          schedule: 'Schedule S',
+          docName: 'Form 16 (Part A & Part B)',
+          issuer: 'Employer / TRACES',
+          auditAction: 'Verify gross salary components, employer TDS credits, and statutory standard deductions.',
+          instruction: 'Ensure the salary matches the amount reported in the AIS. Match Part A TDS to Form 26AS.'
+        });
+        
+        if (userData.income.salary && Number(userData.income.salary.hra || 0) > 0 && activeRegime === 'old') {
+          rows.push({
+            schedule: 'Schedule S (HRA Exemption)',
+            docName: 'Rent Receipts, Lease Agreement & Landlord PAN',
+            issuer: 'Landlord / Assessee',
+            auditAction: 'Audit proof of tenancy, rent paid monthly, and lease terms under Section 10(13A).',
+            instruction: 'Verify rent receipts are signed. Landlord PAN is mandatory if annual rent exceeds ₹1,00,000. Reconcile with bank debits.'
+          });
+        }
+      }
+
+      // 3. House Property HP
+      if (heads.houseProperty !== 0 || heads.hpSetOff !== 0) {
+        var properties = userData.income.houseProperty || [];
+        var interestPaid = false;
+        var letOut = false;
+        for (var p = 0; p < properties.length; p++) {
+          if (properties[p].interestOnLoan > 0) interestPaid = true;
+          if (properties[p].type === 'letOut') letOut = true;
+        }
+
+        if (interestPaid) {
+          rows.push({
+            schedule: 'Schedule HP',
+            docName: 'Home Loan Interest Certificate (Section 24(b))',
+            issuer: 'Lending Bank / Financial Institution',
+            auditAction: 'Validate actual interest paid vs accrued and principal repayment component for Section 80C claiming.',
+            instruction: 'Ensure self-occupied deduction is capped at ₹2,00,000 (Old Regime only). Verify co-borrower share if shared property.'
+          });
+        }
+        if (letOut) {
+          rows.push({
+            schedule: 'Schedule HP',
+            docName: 'Rent receipts & Municipal Tax receipts',
+            issuer: 'Tenant / Municipal Corporation',
+            auditAction: 'Verify rental income received and municipal taxes actually paid during the financial year.',
+            instruction: 'Deduct municipal taxes only on cash-paid basis to establish Net Annual Value (NAV).'
+          });
+        }
+      }
+
+      // 4. Business BP
+      if (heads.business > 0) {
+        var biz = userData.income.business || {};
+        if (biz.type === 'regular') {
+          rows.push({
+            schedule: 'Schedule BP',
+            docName: 'Audited Financials (P&L, Balance Sheet, Ledger)',
+            issuer: 'Assessee / Auditor CA',
+            auditAction: 'Audit business expenses, asset depreciation charts (WDV), and verify net profits under Section 28.',
+            instruction: 'Check if audit under Sec 44AB is required (turnover > ₹1Cr/₹10Cr). Match sales records with GST GSTR-1/3B filings.'
+          });
+        } else {
+          rows.push({
+            schedule: 'Schedule BP (Presumptive)',
+            docName: 'Presumptive Income Statement & GST Return summary',
+            issuer: 'Assessee / GST Portal',
+            auditAction: 'Verify turnover thresholds under Sec 44AD (₹2Cr/₹3Cr) or Sec 44ADA (₹50L/₹75L) and check digital transaction records.',
+            instruction: 'Reconcile digital receipt percentage to ensure it exceeds 95% if claiming the higher presumptive limits. Verify deemed profits (6%/8% or 50%).'
+          });
+        }
+      }
+
+      // 5. Capital Gains CG
+      if (heads.stcg > 0 || heads.ltcg > 0) {
+        rows.push({
+          schedule: 'Schedule CG',
+          docName: 'Capital Gains Statement / Broker P&L',
+          issuer: 'Stock Broker / Mutual Fund House',
+          auditAction: 'Reconcile buy/sell dates, holding periods, grandfathering values (Sec 112A), and security transaction tax (STT).',
+          instruction: 'Match transaction logs with AIS equity sale records. Verify Section 112A listed equity LTCG exemption of ₹1,25,000.'
+        });
+        
+        var cgData = userData.income.capitalGains || {};
+        if (cgData.property && (cgData.property.ltcg > 0 || cgData.property.stcg > 0)) {
+          rows.push({
+            schedule: 'Schedule CG (Property Sale)',
+            docName: 'Purchase & Sale Deed, Stamp Valuation, & Cost Proofs',
+            issuer: 'Sub-Registrar Office / Banks',
+            auditAction: 'Audit indexation benefits (if applicable), purchase value, stamp duty value, and Section 54/54EC exemptions.',
+            instruction: 'Verify TDS deducted by purchaser (Form 16B). Check reinvestment timelines for Capital Gains Account Scheme (CGAS).'
+          });
+        }
+      }
+
+      // 6. Other Sources OS
+      if (heads.otherSources > 0) {
+        rows.push({
+          schedule: 'Schedule OS',
+          docName: 'Bank Saving Statements & FD Interest Certificates',
+          issuer: 'All Savings & Deposit Banks',
+          auditAction: 'Aggregate all interest income earned across savings accounts, fixed deposits, and recurring deposits.',
+          instruction: 'Verify Section 80TTA (up to ₹10,000) or Section 80TTB (up to ₹50,000 for seniors) deductions are correctly claimed.'
+        });
+      }
+
+      // 7. Deductions Schedule VIA
+      if (activeRegime === 'old' && userData.deductions) {
+        var deds = userData.deductions;
+        if (deds['80C'] > 0 || deds['80CCC'] > 0 || deds['80CCD1'] > 0) {
+          rows.push({
+            schedule: 'Schedule VIA (80C)',
+            docName: 'Investment Proofs (PPF passbook, ELSS statements, LIC receipt)',
+            issuer: 'Post Office / Fund Houses / Life Insurance Co.',
+            auditAction: 'Verify that investments were deposited before March 31, 2026, and that policy premiums align with Section 80C guidelines.',
+            instruction: 'Ensure the combined deduction under Sec 80C, 80CCC, and 80CCD(1) does not exceed the ₹1,50,000 ceiling.'
+          });
+        }
+        if (deds['80CCD1B'] > 0 || deds['80CCD2'] > 0) {
+          rows.push({
+            schedule: 'Schedule VIA (NPS)',
+            docName: 'NPS Transaction Statement & Account Ledger',
+            issuer: 'NPS Trust / CRA (NSDL/Karvy)',
+            auditAction: 'Verify self-contribution under 80CCD(1B) (cap ₹50,000) and employer contribution under 80CCD(2) (cap 10% of Basic).',
+            instruction: 'Ensure employer contribution matches the Form 16 Part B declaration. Reconcile with corporate salary structures.'
+          });
+        }
+        if (deds['80D_self'] > 0 || deds['80D_parents'] > 0) {
+          rows.push({
+            schedule: 'Schedule VIA (80D)',
+            docName: 'Health Insurance Certificate & Premium Bank receipts',
+            issuer: 'Health Insurance Provider',
+            auditAction: 'Confirm health insurance policy parameters, member age categories (senior vs non-senior), and payment modes.',
+            instruction: 'Verify that premium payment was made through digital channels (cheque/online/card). Cash premiums are strictly disallowed.'
+          });
+        }
+        if (deds['80E'] > 0) {
+          rows.push({
+            schedule: 'Schedule VIA (80E)',
+            docName: 'Education Loan Interest Certificate',
+            issuer: 'Lending Bank',
+            auditAction: 'Verify the interest paid during the year. No deduction is available for principal repayment.',
+            instruction: 'Verify the loan is taken for higher education of self, spouse, or children, and is within the 8-year statutory limit.'
+          });
+        }
+        if (deds['80G'] > 0) {
+          rows.push({
+            schedule: 'Schedule VIA (80G)',
+            docName: 'Donation Receipts & Form 10BE Certificate',
+            issuer: 'Registered Charitable Trust / NGO',
+            auditAction: 'Verify the PAN of the donee trust, donor registration numbers, and donation eligibility categories (100% or 50% exemption).',
+            instruction: 'Reconcile donations with Form 10BE. Cash donations above ₹2,000 are not eligible for tax deduction.'
+          });
+        }
+      }
+
+      // 8. Taxes Pre-Paid
+      var paid = userData.taxesPaid || {};
+      if (Number(paid.advanceTax || 0) > 0 || Number(paid.selfAssessment || 0) > 0) {
+        rows.push({
+          schedule: 'Taxes Pre-Paid',
+          docName: 'Tax Payment Challan Receipts (Challan 280 / IT Portal Receipts)',
+          issuer: 'E-Filing Portal / Partner Banks',
+          auditAction: 'Verify BSR Code, Challan Date, Challan Serial Number, and Major/Minor Head code settings.',
+          instruction: 'Ensure the payments reflect in Form 26AS / AIS before final ITR submission to ensure automatic credit.'
+        });
+      }
+
+      // Render Table
+      html += '<table class="print-table detailed-checklist-table">';
+      html += '  <thead>';
+      html += '    <tr>';
+      html += '      <th style="width: 15%;">Schedule</th>';
+      html += '      <th style="width: 25%;">Required Document Name</th>';
+      html += '      <th style="width: 20%;">Authorized Source / Issuer</th>';
+      html += '      <th style="width: 25%;">Specific Reconciliation Audit Action</th>';
+      html += '      <th style="width: 15%;">AIS / TIS Matching Instructions</th>';
+      html += '    </tr>';
+      html += '  </thead>';
+      html += '  <tbody>';
+
+      for (var r = 0; r < rows.length; r++) {
+        var row = rows[r];
+        html += '    <tr>';
+        html += '      <td><strong>' + row.schedule + '</strong></td>';
+        html += '      <td>' + row.docName + '</td>';
+        html += '      <td>' + row.issuer + '</td>';
+        html += '      <td style="font-size: 9px; line-height: 1.3;">' + row.auditAction + '</td>';
+        html += '      <td style="font-size: 9px; line-height: 1.3; color: #444;">' + row.instruction + '</td>';
+        html += '    </tr>';
+      }
+
+      html += '  </tbody>';
+      html += '</table>';
+
+      return html;
+    },
+
+    /**
+     * Generate HTML structure for printable tax report.
      * @param {Object} userData
      * @param {Object} taxResult
      * @param {Array<Object>} suggestions
@@ -70,7 +772,7 @@
       html += '    <p>Assessment Year: 2026-27 | Financial Year: 2025-26</p>';
       html += '  </div>';
 
-      // 1. Assessee Metadata (Meta Table)
+      // Assessee Metadata (Meta Table)
       html += '  <table class="audit-meta-table">';
       html += '    <tr>';
       html += '      <td class="label">Name of Assessee</td><td><strong>' + (userData.profile.name || 'N/A').toUpperCase() + '</strong></td>';
@@ -100,7 +802,7 @@
       html += this.generateInputsLedgerTable(userData, activeRegime);
       html += '  </div>';
 
-      // 2. Main computation summary
+      // Section II: Main computation summary
       html += '  <div class="print-section">';
       html += '    <h2>II. Particulars of Computation of Total Income</h2>';
       html += '    <table class="print-table">';
@@ -192,7 +894,7 @@
       html += '    </table>';
       html += '  </div>';
 
-      // 3. Schedule Chapter VI-A Deductions
+      // Section III: Schedule Chapter VI-A Deductions
       html += '  <div class="print-section">';
       html += '    <h2>III. Schedule VIA: Details of Deductions Claimed</h2>';
       html += '    <table class="print-table">';
@@ -226,7 +928,7 @@
       html += '    </table>';
       html += '  </div>';
 
-      // 4. Detailed Tax Computation
+      // Section IV: Detailed Tax Computation
       html += '  <div class="print-section">';
       html += '    <h2>IV. Particulars of Tax Liability Computation</h2>';
       html += '    <table class="print-table">';
@@ -284,13 +986,13 @@
       if (activeData.surcharge > 0) {
         html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Computation:</strong> Taxable income exceeds the surcharge threshold. Surcharge is computed at progressive rate on Tax After Rebate: ' + window.Utils.formatCurrency(activeData.slabTax + activeData.capitalGainsTax - activeData.rebate87A) + ' × surcharge rate = ' + window.Utils.formatCurrency(activeData.surcharge) + '.</p>';
       } else {
-        html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Audit Check:</strong> Surcharge is not applicable as total taxable income (' + window.Utils.formatCurrency(activeData.taxableSlabIncome + activeData.heads.stcg + activeData.heads.ltcg) + ') does not exceed ₹50,00,000 threshold under Section 2(3) of the Finance Act.</p>';
+        html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Audit Check:</strong> Surcharge is not applicable as total taxable income (' + window.Utils.formatCurrency(activeData.taxableSlabIncome + activeData.heads.stcg + activeData.heads.ltcg) + ') does not exceed ₹50,0,000 threshold under Section 2(3) of the Finance Act.</p>';
       }
       html += '      <p style="margin-bottom: 0;"><strong>Health & Education Cess:</strong> Cess is computed flat at 4% under Section 2(11) of the Finance Act on (Tax after Rebate + Surcharge): (' + window.Utils.formatCurrency(Math.max(0, activeData.slabTax + activeData.capitalGainsTax - activeData.rebate87A)) + ' + ' + window.Utils.formatCurrency(activeData.surcharge) + ') × 4% = ' + window.Utils.formatCurrency(activeData.cess) + '.</p>';
       html += '    </div>';
       html += '  </div>';
 
-      // 5. Dual Regime Comparison Statement
+      // Section VI: Dual Regime Comparison Statement
       html += '  <div class="print-section">';
       html += '    <h2>VI. Regime Suitability & Comparison Statement</h2>';
       html += '    <table class="print-table">';
@@ -308,7 +1010,7 @@
       html += '    </table>';
       html += '  </div>';
 
-      // 6. Tax Optimizer advice
+      // Section VII: Tax Optimizer advice
       if (suggestions.length > 0) {
         html += '  <div class="print-section page-break">';
         html += '    <h2>VII. Schedule of Recommended Tax Optimization Strategies</h2>';
@@ -329,7 +1031,7 @@
         html += '  </div>';
       }
 
-      // 6. Legal Citations & Explanatory Notes
+      // Section VIII: Legal Citations & Explanatory Notes
       html += '  <div class="print-section page-break">';
       html += '    <h2>VIII. Legal Citations & Explanatory Notes (Schedules and Deductions)</h2>';
       html += '    <div style="font-size: 10px; line-height: 1.5; color: #333;">';
@@ -415,7 +1117,7 @@
       html += '    </div>';
       html += '  </div>';
 
-      // 7. CA-Grade Compliance Audit Observations
+      // Section IX: CA-Grade Compliance Audit Observations
       html += '  <div class="print-section">';
       html += '    <h2>IX. CA-Grade Compliance Audit Observation Report</h2>';
       html += '    <table class="print-table">';
@@ -444,14 +1146,14 @@
       html += '    </table>';
       html += '  </div>';
 
-      // 8. Document Checklist
+      // Section X: Document Checklist
       html += '  <div class="print-section page-break">';
       html += '    <h2>X. Required Document Verification Checklist</h2>';
       html += '    <p style="font-size: 10px; margin-bottom: 6px; color: #333;">The following checklist details the exact documents and verification steps required to validate the declarations made in this computation sheet and ensure compliance under the Income Tax Act, 1961:</p>';
       html += this.generateDetailedChecklist(userData, activeRegime, heads);
       html += '  </div>';
 
-      // 9. Signature Block
+      // Signature Block
       html += '  <div class="signature-section">';
       html += '    <div class="signature-box">';
       html += '      <p><strong>Signature of the Assessee</strong></p>';
@@ -482,13 +1184,6 @@
       return html;
     },
 
-    /**
-     * Download the report by printing it.
-     * Inserts temporary print styles, opens print dialog, and cleanups.
-     * @param {Object} userData
-     * @param {Object} taxResult
-     * @param {Array<Object>} suggestions
-     */
     downloadPDF: function (userData, taxResult, suggestions) {
       var reportHTML = this.generateReport(userData, taxResult, suggestions);
 
