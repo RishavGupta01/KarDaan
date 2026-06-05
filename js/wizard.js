@@ -834,6 +834,21 @@
       var heads = window.TaxEngine.computeGrossIncome(state.income, 'new', 'below60').heads;
       var totalDeds = state.deductions['80C'] + state.deductions['80CCD1B'] + state.deductions['80D_self'] + state.deductions['80D_parents'];
       
+      var rawHpVal = 0;
+      var hasHpInterest = false;
+      if (state.selectedIncomes.property && state.income.houseProperty) {
+        for (var i = 0; i < state.income.houseProperty.length; i++) {
+          var p = state.income.houseProperty[i];
+          var rent = Number(p.annualRent || 0);
+          var taxes = Number(p.municipalTax || 0);
+          var interest = Number(p.interestOnLoan || 0);
+          var nav = Math.max(0, rent - taxes);
+          var stdDed = p.type === 'letOut' ? nav * 0.30 : 0;
+          rawHpVal += (nav - stdDed - interest);
+          if (interest > 0) hasHpInterest = true;
+        }
+      }
+
       el.innerHTML = 
         '<h2>10. Review Details</h2>' +
         '<p class="card-subtitle">Review your reported income details before calculating.</p>' +
@@ -844,7 +859,7 @@
         '      <tbody>' +
         '        <tr><td><strong>Profile</strong></td><td>Name: ' + (state.profile.name || 'N/A') + ' | Age: ' + state.profile.age + '</td><td>-</td></tr>' +
         (state.selectedIncomes.salary ? '        <tr><td><strong>Salary</strong></td><td>Gross Salary reported</td><td>' + window.Utils.formatCurrency(heads.salaryGross) + '</td></tr>' : '') +
-        (state.selectedIncomes.property ? '        <tr><td><strong>Properties</strong></td><td>Owned HP Interest/Income</td><td>' + window.Utils.formatCurrency(heads.houseProperty) + '</td></tr>' : '') +
+        (state.selectedIncomes.property ? '        <tr><td><strong>Properties</strong></td><td>Owned HP Interest/Income' + (hasHpInterest ? ' <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span>' : '') + '</td><td>' + window.Utils.formatCurrency(rawHpVal) + '</td></tr>' : '') +
         (state.selectedIncomes.gains ? '        <tr><td><strong>Capital Gains</strong></td><td>STCG + LTCG portfolio net</td><td>' + window.Utils.formatCurrency(heads.stcg + heads.ltcg) + '</td></tr>' : '') +
         (state.selectedIncomes.business ? '        <tr><td><strong>Business</strong></td><td>Presumptive or Regular</td><td>' + window.Utils.formatCurrency(heads.business) + '</td></tr>' : '') +
         (state.selectedIncomes.other ? '        <tr><td><strong>Other Sources</strong></td><td>Savings / FDs / Dividends</td><td>' + window.Utils.formatCurrency(heads.otherSources) + '</td></tr>' : '') +

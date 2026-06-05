@@ -72,7 +72,7 @@
       }
 
       // Slabs/Deductions below are evaluated to show all possible tax-saving ideas
-      var checkOldRegimeDeductions = true;
+      var checkOldRegimeDeductions = (regime === 'old');
       var oldSlabs = TaxEngine.getOldRegimeSlabs(ageCategory);
       var oldMarginalRate = 0;
       var oldTaxableIncome = taxResult.oldRegime.taxableSlabIncome;

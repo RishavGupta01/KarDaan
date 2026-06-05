@@ -43,6 +43,179 @@
     },
 
     /**
+     * Generate tabular ledger of Capital Gains set-offs under Sections 70 and 74.
+     * @param {Object} setoff - Set-off details from TaxEngine
+     * @returns {string} HTML table
+     */
+    generateCapitalGainsSetoffTable: function (setoff) {
+      if (!setoff) return '';
+      
+      var html = '';
+      html += '<table class="print-table" style="margin-top: 10px; margin-bottom: 15px;">';
+      html += '  <thead>';
+      html += '    <tr>';
+      html += '      <th>Asset Category & Gain Type</th>';
+      html += '      <th class="text-right">Gross Gains (₹)</th>';
+      html += '      <th class="text-right">Loss Set-off (₹)</th>';
+      html += '      <th class="text-right">Net Taxable (₹)</th>';
+      html += '      <th class="text-right">Carry-forward Loss (₹)</th>';
+      html += '    </tr>';
+      html += '  </thead>';
+      html += '  <tbody>';
+
+      // Slab STCG
+      var slabStcgLossApplied = setoff.applied.stclAgainstSlabStcg;
+      html += '    <tr>';
+      html += '      <td>STCG Slab Rate (Real Estate/Gold/Debt)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.initial.slabStcg) + '</td>';
+      html += '      <td class="text-right">-' + window.Utils.formatCurrency(slabStcgLossApplied) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.final.slabStcg) + '</td>';
+      html += '      <td class="text-right">0</td>';
+      html += '    </tr>';
+
+      // Listed STCG
+      var listedStcgLossApplied = setoff.applied.stclAgainstListedStcg;
+      html += '    <tr>';
+      html += '      <td>STCG Sec 111A (Listed Equity)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.initial.listedStcg) + '</td>';
+      html += '      <td class="text-right">-' + window.Utils.formatCurrency(listedStcgLossApplied) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.final.listedStcg) + '</td>';
+      html += '      <td class="text-right">0</td>';
+      html += '    </tr>';
+
+      // Other LTCG
+      var otherLtcgLossApplied = setoff.applied.ltclAgainstOtherLtcg + setoff.applied.stclAgainstOtherLtcg;
+      html += '    <tr>';
+      html += '      <td>LTCG Sec 112 (Real Estate/Gold/Other)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.initial.otherLtcg) + '</td>';
+      html += '      <td class="text-right">-' + window.Utils.formatCurrency(otherLtcgLossApplied) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.final.otherLtcg) + '</td>';
+      html += '      <td class="text-right">0</td>';
+      html += '    </tr>';
+
+      // Listed LTCG
+      var listedLtcgLossApplied = setoff.applied.ltclAgainstListedLtcg + setoff.applied.stclAgainstListedLtcg;
+      html += '    <tr>';
+      html += '      <td>LTCG Sec 112A (Listed Equity)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.initial.listedLtcg) + '</td>';
+      html += '      <td class="text-right">-' + window.Utils.formatCurrency(listedLtcgLossApplied) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(setoff.final.listedLtcg) + '</td>';
+      html += '      <td class="text-right">0</td>';
+      html += '    </tr>';
+
+      // Carry forwards row
+      if (setoff.final.stclCarryForward > 0 || setoff.final.ltclCarryForward > 0) {
+        html += '    <tr class="total-row">';
+        html += '      <td><strong>Carry-Forward Losses to AY 2027-28</strong></td>';
+        html += '      <td colspan="3"></td>';
+        html += '      <td class="text-right" style="color: #b91c1c;"><strong>STCL: ' + window.Utils.formatCurrency(setoff.final.stclCarryForward) + '<br>LTCL: ' + window.Utils.formatCurrency(setoff.final.ltclCarryForward) + '</strong></td>';
+        html += '    </tr>';
+      }
+
+      html += '  </tbody>';
+      html += '</table>';
+      return html;
+    },
+
+    /**
+     * Generate step-by-step advance tax penal interest calculation table under Sections 234B & 234C.
+     * @param {Object} activeData - Active regime tax payload
+     * @param {number} totalTds - Total TDS credits
+     * @param {number} advanceTaxPaid - Advance tax paid
+     * @returns {string} HTML table
+     */
+    generateAdvanceTaxInterestTable: function (activeData, totalTds, advanceTaxPaid) {
+      if (!activeData || activeData.interestTotal <= 0) return '';
+      
+      var assessedTax = Math.max(0, activeData.netTaxBeforeInterest - totalTds);
+
+      var html = '';
+      html += '<p style="font-size: 10px; margin-top: 15px; margin-bottom: 4px; font-weight: bold; color: #1e3a8a;">Section 234B & 234C: Detailed Penal Interest Computation</p>';
+      html += '<table class="print-table" style="margin-bottom: 15px;">';
+      html += '  <thead>';
+      html += '    <tr>';
+      html += '      <th>Interest Section / Installment Due Date</th>';
+      html += '      <th class="text-right">Assessed Tax (₹)</th>';
+      html += '      <th class="text-right">Required Cumulative (₹)</th>';
+      html += '      <th class="text-right">Actual Cumulative (₹)</th>';
+      html += '      <th class="text-right">Shortfall (₹)</th>';
+      html += '      <th class="text-right">Interest (1% pm) (₹)</th>';
+      html += '    </tr>';
+      html += '  </thead>';
+      html += '  <tbody>';
+
+      // 234C Q1
+      var q1Req = assessedTax * 0.15;
+      var q1Int = assessedTax * 0.15 * 0.01 * 3;
+      html += '    <tr>';
+      html += '      <td>Sec 234C - Installment 1 (15 June 2025)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(assessedTax) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q1Req) + ' (15%)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(0) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q1Req) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q1Int) + ' (3 months)</td>';
+      html += '    </tr>';
+
+      // 234C Q2
+      var q2Req = assessedTax * 0.45;
+      var q2Int = assessedTax * 0.45 * 0.01 * 3;
+      html += '    <tr>';
+      html += '      <td>Sec 234C - Installment 2 (15 Sept 2025)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(assessedTax) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q2Req) + ' (45%)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(0) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q2Req) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q2Int) + ' (3 months)</td>';
+      html += '    </tr>';
+
+      // 234C Q3
+      var q3Req = assessedTax * 0.75;
+      var q3Int = assessedTax * 0.75 * 0.01 * 3;
+      html += '    <tr>';
+      html += '      <td>Sec 234C - Installment 3 (15 Dec 2025)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(assessedTax) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q3Req) + ' (75%)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(0) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q3Req) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q3Int) + ' (3 months)</td>';
+      html += '    </tr>';
+
+      // 234C Q4
+      var q4Req = assessedTax * 1.00;
+      var shortfallQ4 = Math.max(0, assessedTax - advanceTaxPaid);
+      var q4Int = shortfallQ4 * 0.01 * 1;
+      html += '    <tr>';
+      html += '      <td>Sec 234C - Installment 4 (15 March 2026)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(assessedTax) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q4Req) + ' (100%)</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(advanceTaxPaid) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(shortfallQ4) + '</td>';
+      html += '      <td class="text-right">' + window.Utils.formatCurrency(q4Int) + ' (1 month)</td>';
+      html += '    </tr>';
+
+      // 234B
+      if (activeData.interest234B > 0) {
+        var shortfallB = Math.max(0, assessedTax - advanceTaxPaid);
+        html += '    <tr>';
+        html += '      <td>Sec 234B - Default of Advance Tax (FY end shortfall)</td>';
+        html += '      <td class="text-right">' + window.Utils.formatCurrency(assessedTax) + '</td>';
+        html += '      <td class="text-right">' + window.Utils.formatCurrency(assessedTax * 0.90) + (assessedTax * 0.90 >= 100000 ? ' (90%)' : '') + '</td>';
+        html += '      <td class="text-right">' + window.Utils.formatCurrency(advanceTaxPaid) + '</td>';
+        html += '      <td class="text-right">' + window.Utils.formatCurrency(shortfallB) + '</td>';
+        html += '      <td class="text-right">' + window.Utils.formatCurrency(activeData.interest234B) + ' (4 months)</td>';
+        html += '    </tr>';
+      }
+
+      html += '    <tr class="total-row">';
+      html += '      <td colspan="5"><strong>Total Penal Interest (Sec 234B + 234C)</strong></td>';
+      html += '      <td class="text-right" style="color: #b91c1c;"><strong>' + window.Utils.formatCurrency(activeData.interestTotal) + '</strong></td>';
+      html += '    </tr>';
+      html += '  </tbody>';
+      html += '</table>';
+      return html;
+    },
+
+    /**
      * Generate tabular ledger of user inputs and their tax impacts.
      * @param {Object} userData
      * @param {string} activeRegime
@@ -161,72 +334,93 @@
       if (userData.selectedIncomes.gains && userData.income.capitalGains) {
         var cg = userData.income.capitalGains;
         if (cg.listed) {
-          if (cg.listed.stcg > 0) {
+          if (cg.listed.stcg !== 0) {
+            var isLoss = cg.listed.stcg < 0;
             rows.push({
               category: 'Schedule CG: Capital Gains',
-              input: 'Short-Term Capital Gains (Equity)',
+              input: isLoss ? 'Short-Term Capital Loss (Equity)' : 'Short-Term Capital Gains (Equity)',
               value: window.Utils.formatCurrency(cg.listed.stcg),
               source: 'Step: Capital Gains > STCG Equity',
-              impact: 'Taxed at a flat rate of 20% under Section 111A. Standard slab deductions and rebates do not offset this except under specific low-income slab exhaustion rules.'
+              impact: isLoss 
+                ? 'Short-term capital loss. Can set off against any STCG or LTCG under Section 70.'
+                : 'Taxed at a flat rate of 20% under Section 111A. Standard slab deductions and rebates do not offset this except under specific low-income slab exhaustion rules.'
             });
           }
-          if (cg.listed.ltcg > 0) {
+          if (cg.listed.ltcg !== 0) {
+            var isLoss = cg.listed.ltcg < 0;
             rows.push({
               category: 'Schedule CG: Capital Gains',
-              input: 'Long-Term Capital Gains (Equity)',
+              input: isLoss ? 'Long-Term Capital Loss (Equity)' : 'Long-Term Capital Gains (Equity)',
               value: window.Utils.formatCurrency(cg.listed.ltcg),
               source: 'Step: Capital Gains > LTCG Equity',
-              impact: 'Taxed at flat 12.5% under Section 112A. Eligible for a combined statutory tax exemption on the first ₹1,25,000 of gains.'
+              impact: isLoss
+                ? 'Long-term capital loss. Can only set off against LTCG under Section 74.'
+                : 'Taxed at flat 12.5% under Section 112A. Eligible for a combined statutory tax exemption on the first ₹1,25,000 of gains.'
             });
           }
         }
         if (cg.property) {
-          if (cg.property.stcg > 0) {
+          if (cg.property.stcg !== 0) {
+            var isLoss = cg.property.stcg < 0;
             rows.push({
               category: 'Schedule CG: Capital Gains',
-              input: 'Short-Term Gains (Property)',
+              input: isLoss ? 'Short-Term Loss (Property)' : 'Short-Term Gains (Property)',
               value: window.Utils.formatCurrency(cg.property.stcg),
               source: 'Step: Capital Gains > STCG Property',
-              impact: 'Taxed at normal progressive slab rates based on your selected regime.'
+              impact: isLoss
+                ? 'Short-term capital loss. Can set off against any STCG or LTCG.'
+                : 'Taxed at normal progressive slab rates based on your selected regime.'
             });
           }
-          if (cg.property.ltcg > 0) {
+          if (cg.property.ltcg !== 0) {
+            var isLoss = cg.property.ltcg < 0;
             rows.push({
               category: 'Schedule CG: Capital Gains',
-              input: 'Long-Term Gains (Property)',
+              input: isLoss ? 'Long-Term Loss (Property)' : 'Long-Term Gains (Property)',
               value: window.Utils.formatCurrency(cg.property.ltcg),
               source: 'Step: Capital Gains > LTCG Property',
-              impact: 'Taxed at a flat rate of 12.5% without indexation (Budget 2024 revised rules).'
+              impact: isLoss
+                ? 'Long-term capital loss. Can only set off against LTCG.'
+                : 'Taxed at a flat rate of 12.5% without indexation (Budget 2024 revised rules).'
             });
           }
         }
         if (cg.gold) {
-          if (cg.gold.stcg > 0) {
+          if (cg.gold.stcg !== 0) {
+            var isLoss = cg.gold.stcg < 0;
             rows.push({
               category: 'Schedule CG: Capital Gains',
-              input: 'Short-Term Gains (Gold)',
+              input: isLoss ? 'Short-Term Loss (Gold)' : 'Short-Term Gains (Gold)',
               value: window.Utils.formatCurrency(cg.gold.stcg),
               source: 'Step: Capital Gains > STCG Gold',
-              impact: 'Taxed at progressive slab rates.'
+              impact: isLoss
+                ? 'Short-term capital loss. Can set off against any STCG or LTCG.'
+                : 'Taxed at progressive slab rates.'
             });
           }
-          if (cg.gold.ltcg > 0) {
+          if (cg.gold.ltcg !== 0) {
+            var isLoss = cg.gold.ltcg < 0;
             rows.push({
               category: 'Schedule CG: Capital Gains',
-              input: 'Long-Term Gains (Gold)',
+              input: isLoss ? 'Long-Term Loss (Gold)' : 'Long-Term Gains (Gold)',
               value: window.Utils.formatCurrency(cg.gold.ltcg),
               source: 'Step: Capital Gains > LTCG Gold',
-              impact: 'Taxed at a flat rate of 12.5% under Section 112.'
+              impact: isLoss
+                ? 'Long-term capital loss. Can only set off against LTCG.'
+                : 'Taxed at a flat rate of 12.5% under Section 112.'
             });
           }
         }
-        if (cg.debt && cg.debt.gains > 0) {
+        if (cg.debt && cg.debt.gains !== 0) {
+          var isLoss = cg.debt.gains < 0;
           rows.push({
             category: 'Schedule CG: Capital Gains',
-            input: 'Debt Mutual Fund Gains',
+            input: isLoss ? 'Debt Mutual Fund Losses' : 'Debt Mutual Fund Gains',
             value: window.Utils.formatCurrency(cg.debt.gains),
             source: 'Step: Capital Gains > Debt Funds',
-            impact: 'Classified strictly as Short-Term Capital Gains under Section 50AA; taxed at progressive slab rates.'
+            impact: isLoss
+              ? 'Short-term capital loss. Can set off against any STCG or LTCG.'
+              : 'Classified strictly as Short-Term Capital Gains under Section 50AA; taxed at progressive slab rates.'
           });
         }
       }
@@ -381,12 +575,23 @@
       }
 
       // 8. Taxes Paid
-      if (userData.taxesPaid) {
-        var tp = userData.taxesPaid;
+      if (userData.taxesPaid || (userData.income && userData.income.salary && Number(userData.income.salary.tds || 0) > 0)) {
+        var tp = userData.taxesPaid || {};
+        var salaryTdsVal = (userData.income && userData.income.salary) ? Number(userData.income.salary.tds || 0) : 0;
+        
+        if (salaryTdsVal > 0) {
+          rows.push({
+            category: 'Taxes Pre-Paid',
+            input: 'Salary TDS (Form 16)',
+            value: window.Utils.formatCurrency(salaryTdsVal),
+            source: 'Step: Salary > TDS on Salary',
+            impact: 'Credited directly against computed Net Tax Liability. Reduces final tax payable or increases refund.'
+          });
+        }
         if (Number(tp.tds || 0) > 0) {
           rows.push({
             category: 'Taxes Pre-Paid',
-            input: 'Tax Deducted at Source (TDS/TCS)',
+            input: 'Tax Deducted at Source (TDS/TCS on Non-Salary)',
             value: window.Utils.formatCurrency(tp.tds),
             source: 'Step: Taxes Paid > TDS',
             impact: 'Credited directly against computed Net Tax Liability. Reduces final tax payable or increases refund.'
@@ -481,7 +686,7 @@
         if (slab.max === Infinity) {
           rangeText = 'Above ' + window.Utils.formatCurrency(slab.min);
         } else {
-          rangeText = '₹' + (slab.min === 0 ? '0' : window.Utils.formatCurrency(slab.min + 1)) + ' to ₹' + window.Utils.formatCurrency(slab.max);
+          rangeText = (slab.min === 0 ? '₹0' : window.Utils.formatCurrency(slab.min + 1)) + ' to ' + window.Utils.formatCurrency(slab.max);
         }
 
         var rateText = (slab.rate * 100).toFixed(0) + '%';
@@ -497,7 +702,7 @@
           if (slab.rate === 0) {
             formula = 'Exempt';
           } else {
-            formula = '₹' + window.Utils.formatCurrency(taxableInSlab) + ' × ' + rateText;
+            formula = window.Utils.formatCurrency(taxableInSlab) + ' × ' + rateText;
           }
         } else {
           taxableInSlab = 0;
@@ -764,12 +969,18 @@
       var html = '';
 
       // Report Container
-      html += '<div class="print-report">';
+      html += '<div class="print-report notranslate" translate="no">';
       
       // Document Header
-      html += '  <div class="print-header">';
-      html += '    <h1>STATEMENT OF COMPUTATION OF TOTAL INCOME & TAX LIABILITY</h1>';
-      html += '    <p>Assessment Year: 2026-27 | Financial Year: 2025-26</p>';
+      html += '  <div class="print-header" style="display: flex !important; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 25px;">';
+      html += '    <div style="text-align: left;">';
+      html += '      <h1 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px;">STATEMENT OF COMPUTATION OF TOTAL INCOME & TAX LIABILITY</h1>';
+      html += '      <p style="margin: 4px 0 0 0; font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #475569;">Assessment Year: 2026-27 | Financial Year: 2025-26</p>';
+      html += '    </div>';
+      html += '    <div style="border: 2px solid #0f172a; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; letter-spacing: 1px; color: #0f172a; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; background: #f8fafc; flex-shrink: 0; margin-left: 15px;">';
+      html += '      <span style="font-size: 11px; font-weight: 800;">KARDAAN</span>';
+      html += '      <span style="font-size: 6px; font-weight: 700; color: #64748b; white-space: nowrap;">CERTIFIED AUDIT</span>';
+      html += '    </div>';
       html += '  </div>';
 
       // Assessee Metadata (Meta Table)
@@ -847,11 +1058,11 @@
         html += '        </tr>';
       }
 
-      // Capital Gains Row
-      if (heads.stcg > 0 || heads.ltcg > 0) {
+      // Capital Gains Row (including initial losses check to display the schedule details)
+      if (heads.stcg > 0 || heads.ltcg > 0 || (heads.setoffDetails && (heads.setoffDetails.initial.listedLtcgLoss > 0 || heads.setoffDetails.initial.otherLtcgLoss > 0 || heads.setoffDetails.initial.listedStcgLoss > 0 || heads.setoffDetails.initial.slabStcgLoss > 0))) {
         var totalCg = heads.stcg + heads.ltcg;
         html += '        <tr>';
-        html += '          <td><strong>Schedule CG: Capital Gains</strong></td>';
+        html += '          <td><strong>Schedule CG: Capital Gains (Net after Set-off)</strong></td>';
         html += '          <td class="text-right">' + window.Utils.formatCurrency(totalCg) + '</td>';
         html += '          <td class="text-right">0</td>';
         html += '          <td class="text-right">' + window.Utils.formatCurrency(totalCg) + '</td>';
@@ -887,11 +1098,16 @@
       html += '        <tr class="double-total-row">';
       html += '          <td><strong>TOTAL TAXABLE INCOME (Rounded Off)</strong></td>';
       html += '          <td colspan="2"></td>';
-      html += '          <td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.taxableSlabIncome) + '</strong></td>';
+      html += '          <td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.totalTaxableIncome) + '</strong></td>';
       html += '        </tr>';
 
       html += '      </tbody>';
       html += '    </table>';
+      
+      if (heads.setoffDetails && (heads.setoffDetails.initial.listedLtcgLoss > 0 || heads.setoffDetails.initial.otherLtcgLoss > 0 || heads.setoffDetails.initial.listedStcgLoss > 0 || heads.setoffDetails.initial.slabStcgLoss > 0 || heads.setoffDetails.initial.listedLtcg > 0 || heads.setoffDetails.initial.otherLtcg > 0 || heads.setoffDetails.initial.listedStcg > 0 || heads.setoffDetails.initial.slabStcg > 0)) {
+        html += '<p style="font-size: 10px; margin-top: 10px; margin-bottom: 4px; font-weight: bold; color: #1e3a8a;">Schedule CG: Capital Gains Set-Off Statement (Sec 70 & 74)</p>';
+        html += this.generateCapitalGainsSetoffTable(heads.setoffDetails);
+      }
       html += '  </div>';
 
       // Section III: Schedule Chapter VI-A Deductions
@@ -954,28 +1170,43 @@
       }
       
       html += '        <tr><td>Add: Health and Education Cess</td><td class="text-right">4.0%</td><td class="text-right">' + window.Utils.formatCurrency(activeData.cess) + '</td></tr>';
+      html += '        <tr class="double-total-row"><td><strong>NET TAX LIABILITY (A)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.netTaxBeforeInterest) + '</strong></td></tr>';
       
-      html += '        <tr class="double-total-row"><td><strong>NET TAX PAYABLE (A)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.netTax) + '</strong></td></tr>';
+      if (activeData.interestTotal > 0) {
+        html += '        <tr><td>Add: Interest under Section 234B (Default of Advance Tax)</td><td class="text-right">1% / month</td><td class="text-right">' + window.Utils.formatCurrency(activeData.interest234B) + '</td></tr>';
+        html += '        <tr><td>Add: Interest under Section 234C (Deferment of Advance Tax)</td><td class="text-right">1% / month</td><td class="text-right">' + window.Utils.formatCurrency(activeData.interest234C) + '</td></tr>';
+        html += '        <tr class="double-total-row"><td><strong>TOTAL TAX & INTEREST LIABILITY (A1)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.netTax) + '</strong></td></tr>';
+      }
       
       var paid = userData.taxesPaid || {};
-      var totalPaid = Number(paid.tds || 0) + Number(paid.advanceTax || 0) + Number(paid.selfAssessment || 0);
+      var salaryTds = (userData.income && userData.income.salary) ? Number(userData.income.salary.tds || 0) : 0;
+      var nonSalaryTds = Number(paid.tds || 0);
+      var advanceTaxPaid = Number(paid.advanceTax || 0);
+      var selfAssessmentPaid = Number(paid.selfAssessment || 0);
+      var totalPaid = salaryTds + nonSalaryTds + advanceTaxPaid + selfAssessmentPaid;
       
-      html += '        <tr><td>Less: Tax Deducted at Source (TDS) / TCS</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(paid.tds || 0) + '</td></tr>';
-      html += '        <tr><td>Less: Advance Tax Paid</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(paid.advanceTax || 0) + '</td></tr>';
-      html += '        <tr><td>Less: Self-Assessment Tax Paid</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(paid.selfAssessment || 0) + '</td></tr>';
-      html += '        <tr class="total-row"><td><strong>TOTAL TAX PAID (B)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(totalPaid) + '</strong></td></tr>';
+      html += '        <tr><td>Less: TDS on Salary (Form 16)</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(salaryTds) + '</td></tr>';
+      html += '        <tr><td>Less: TDS / TCS on Non-Salary Income (Form 26AS)</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(nonSalaryTds) + '</td></tr>';
+      html += '        <tr><td>Less: Advance Tax Paid</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(advanceTaxPaid) + '</td></tr>';
+      html += '        <tr><td>Less: Self-Assessment Tax Paid</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(selfAssessmentPaid) + '</td></tr>';
+      html += '        <tr class="total-row"><td><strong>TOTAL TAX PAID / CREDITS (B)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(totalPaid) + '</strong></td></tr>';
       
       var bal = activeData.netTax - totalPaid;
       if (bal > 0) {
-        html += '        <tr class="balance-due-row"><td><strong>NET TAX OUTSTANDING (PAYABLE) (A - B)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(bal) + '</strong></td></tr>';
+        html += '        <tr class="balance-due-row"><td><strong>NET TAX OUTSTANDING (PAYABLE) (A1 - B)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(bal) + '</strong></td></tr>';
       } else {
-        html += '        <tr class="refund-due-row"><td><strong>NET REFUND DUE TO ASSESSEE (B - A)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(Math.abs(bal)) + '</strong></td></tr>';
+        html += '        <tr class="refund-due-row"><td><strong>NET REFUND DUE TO ASSESSEE (B - A1)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(Math.abs(bal)) + '</strong></td></tr>';
       }
       
       html += '      </tbody>';
       html += '    </table>';
+      
+      if (activeData.interestTotal > 0) {
+        html += this.generateAdvanceTaxInterestTable(activeData, salaryTds + nonSalaryTds, advanceTaxPaid);
+      }
+      
       html += '  </div>';
-
+ 
       // Section V: Slab & Surcharge Step-by-Step Computations (Transparency Block)
       html += '  <div class="print-section page-break">';
       html += '    <h2>V. Progressive Slab & Surcharge Step-by-Step Computations</h2>';
@@ -986,12 +1217,12 @@
       if (activeData.surcharge > 0) {
         html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Computation:</strong> Taxable income exceeds the surcharge threshold. Surcharge is computed at progressive rate on Tax After Rebate: ' + window.Utils.formatCurrency(activeData.slabTax + activeData.capitalGainsTax - activeData.rebate87A) + ' × surcharge rate = ' + window.Utils.formatCurrency(activeData.surcharge) + '.</p>';
       } else {
-        html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Audit Check:</strong> Surcharge is not applicable as total taxable income (' + window.Utils.formatCurrency(activeData.taxableSlabIncome + activeData.heads.stcg + activeData.heads.ltcg) + ') does not exceed ₹50,0,000 threshold under Section 2(3) of the Finance Act.</p>';
+        html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Audit Check:</strong> Surcharge is not applicable as total taxable income (' + window.Utils.formatCurrency(activeData.totalTaxableIncome) + ') does not exceed ₹50,00,000 threshold under Section 2(3) of the Finance Act.</p>';
       }
       html += '      <p style="margin-bottom: 0;"><strong>Health & Education Cess:</strong> Cess is computed flat at 4% under Section 2(11) of the Finance Act on (Tax after Rebate + Surcharge): (' + window.Utils.formatCurrency(Math.max(0, activeData.slabTax + activeData.capitalGainsTax - activeData.rebate87A)) + ' + ' + window.Utils.formatCurrency(activeData.surcharge) + ') × 4% = ' + window.Utils.formatCurrency(activeData.cess) + '.</p>';
       html += '    </div>';
       html += '  </div>';
-
+ 
       // Section VI: Dual Regime Comparison Statement
       html += '  <div class="print-section">';
       html += '    <h2>VI. Regime Suitability & Comparison Statement</h2>';
@@ -1001,10 +1232,9 @@
       html += '      </thead>';
       html += '      <tbody>';
       html += '        <tr><td>Gross Total Income (GTI)</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.oldRegime.grossIncome) + '</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.newRegime.grossIncome) + '</td></tr>';
-      html += '        <tr><td>Less: Standard Deduction</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.oldRegime.standardDeduction) + '</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.newRegime.standardDeduction) + '</td></tr>';
       html += '        <tr><td>Less: Chapter VI-A Deductions</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.oldRegime.otherDeductions) + '</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.newRegime.otherDeductions) + '</td></tr>';
-      html += '        <tr><td>Total Net Taxable Income</td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.oldRegime.taxableSlabIncome) + '</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.newRegime.taxableSlabIncome) + '</strong></td></tr>';
-      html += '        <tr class="double-total-row"><td><strong>NET TAX LIABILITY (Incl. Cess)</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.oldRegime.netTax) + '</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.newRegime.netTax) + '</strong></td></tr>';
+      html += '        <tr><td>Total Net Taxable Income</td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.oldRegime.totalTaxableIncome) + '</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.newRegime.totalTaxableIncome) + '</strong></td></tr>';
+      html += '        <tr class="double-total-row"><td><strong>NET TAX LIABILITY (Incl. Cess & Interest)</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.oldRegime.netTax) + '</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.newRegime.netTax) + '</strong></td></tr>';
       html += '        <tr class="total-row"><td colspan="3" class="text-center"><strong>RECOMMENDATION: OPT FOR ' + (activeRegime === 'new' ? 'NEW REGIME' : 'OLD REGIME') + ' (SAVINGS OF ' + window.Utils.formatCurrency(taxResult.savings) + ')</strong></td></tr>';
       html += '      </tbody>';
       html += '    </table>';
@@ -1198,35 +1428,37 @@
       var printStyle = document.createElement('style');
       printStyle.id = 'temp-print-style';
       printStyle.innerHTML = 
+        '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");' +
         '@media print {' +
         '  body > *:not(#temp-print-div) { display: none !important; }' +
         '  #temp-print-div, #temp-print-div * { display: revert; }' +
         '  #temp-print-div { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }' +
-        '  .print-report { padding: 30px 40px; font-family: "Georgia", "Times New Roman", serif; color: #000; background: #fff; line-height: 1.4; max-width: 900px; margin: 0 auto; }' +
-        '  .print-header { text-align: center; margin-bottom: 20px; border-bottom: 3px double #000; padding-bottom: 10px; }' +
-        '  .print-header h1 { font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; }' +
-        '  .print-header p { margin: 6px 0 0 0; font-size: 10px; font-style: italic; color: #333; }' +
-        '  .audit-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }' +
-        '  .audit-meta-table td { padding: 6px 8px; font-size: 10px; border: 1px solid #777; vertical-align: middle; }' +
-        '  .audit-meta-table td.label { font-weight: bold; background: #f4f4f4; width: 22%; text-transform: uppercase; font-size: 9px; color: #333; }' +
-        '  .print-section { margin-bottom: 25px; page-break-inside: avoid; }' +
-        '  .print-section h2 { font-size: 11px; font-weight: bold; margin-bottom: 8px; border-bottom: 1.5px solid #000; padding-bottom: 3px; text-transform: uppercase; color: #1e3a8a; }' +
-        '  .print-table { width: 100%; border-collapse: collapse; margin-top: 5px; }' +
-        '  .print-table th { background: #1e3a8a; color: #ffffff !important; border: 1px solid #444; padding: 6px 8px; font-size: 9px; text-align: left; text-transform: uppercase; font-weight: bold; }' +
-        '  .print-table td { border: 1px solid #aaa; padding: 6px 8px; font-size: 10px; vertical-align: middle; }' +
-        '  .total-row td { font-weight: bold; background: #fafafa; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; }' +
-        '  .double-total-row td { font-weight: bold; font-size: 11px; background: #eaeaea; border-top: 1.5px solid #000; border-bottom: 3px double #000 !important; }' +
-        '  .balance-due-row td { font-weight: bold; color: #b91c1c !important; background: #fef2f2; border: 1.5px solid #b91c1c; }' +
-        '  .refund-due-row td { font-weight: bold; color: #15803d !important; background: #f0fdf4; border: 1.5px solid #15803d; }' +
-        '  .sub-row td { font-size: 9px; color: #444; padding-left: 20px; border-top: none; }' +
+        '  .print-report { padding: 20px; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #1e293b; background: #fff; line-height: 1.5; max-width: 920px; margin: 0 auto; font-size: 10px; }' +
+        '  .print-header { display: flex !important; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 25px; }' +
+        '  .print-header h1 { font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }' +
+        '  .print-header p { margin: 4px 0 0 0; font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #475569; }' +
+        '  .audit-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #fff; }' +
+        '  .audit-meta-table td { padding: 6px 10px; font-size: 10px; border: 1px solid #cbd5e1; vertical-align: middle; color: #334155; }' +
+        '  .audit-meta-table td.label { font-weight: 700; background: #f1f5f9; width: 22%; text-transform: uppercase; font-size: 8px; letter-spacing: 0.5px; color: #475569; }' +
+        '  .print-section { margin-bottom: 28px; page-break-inside: avoid; }' +
+        '  .print-section h2 { font-size: 11px; font-weight: 700; margin-top: 0; margin-bottom: 10px; border-bottom: 1.5px solid #0f172a; padding-bottom: 4px; text-transform: uppercase; color: #0f172a; letter-spacing: 0.5px; }' +
+        '  .print-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 5px; }' +
+        '  .print-table th { background: #0f172a; color: #ffffff !important; border: 1px solid #0f172a; padding: 7px 10px; font-size: 8px; text-align: left; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }' +
+        '  .print-table td { border: 1px solid #cbd5e1; padding: 7px 10px; font-size: 9px; vertical-align: middle; color: #334155; }' +
+        '  .print-table tr:nth-child(even) td { background-color: #f8fafc; }' +
+        '  .total-row td { font-weight: 700; background: #f1f5f9 !important; color: #0f172a !important; border-top: 1.5px solid #0f172a; border-bottom: 1.5px solid #0f172a; }' +
+        '  .double-total-row td { font-weight: 700; font-size: 10px; background: #e2e8f0 !important; color: #0f172a !important; border-top: 1.5px solid #0f172a; border-bottom: 3px double #0f172a !important; }' +
+        '  .balance-due-row td { font-weight: 700; color: #991b1b !important; background: #fef2f2 !important; border: 1.5px solid #fca5a5 !important; }' +
+        '  .refund-due-row td { font-weight: 700; color: #166534 !important; background: #f0fdf4 !important; border: 1.5px solid #bbf7d0 !important; }' +
+        '  .sub-row td { font-size: 8px; color: #64748b; padding-left: 20px; border-top: none; }' +
         '  .text-right { text-align: right !important; }' +
         '  .text-center { text-align: center !important; }' +
-        '  .text-success { color: #15803d !important; }' +
+        '  .text-success { color: #166534 !important; }' +
         '  .page-break { page-break-before: always; }' +
-        '  .signature-section { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }' +
-        '  .signature-box { width: 45%; border-top: 1.5px solid #000; text-align: center; padding-top: 8px; font-size: 10px; line-height: 1.5; }' +
-        '  .print-disclaimer { margin-top: 30px; font-size: 8px; color: #444; line-height: 1.4; border-top: 1.5px solid #000; padding-top: 8px; font-style: italic; text-align: justify; }' +
-        '  .print-table tr:nth-child(even) td { background-color: #fafafa; }' +
+        '  .signature-section { margin-top: 45px; display: flex; justify-content: space-between; page-break-inside: avoid; }' +
+        '  .signature-box { width: 45%; border-top: 1.5px solid #0f172a; text-align: center; padding-top: 10px; font-size: 9px; line-height: 1.6; color: #475569; }' +
+        '  .print-disclaimer { margin-top: 35px; font-size: 8px; color: #64748b; line-height: 1.5; border-top: 1.5px solid #e2e8f0; padding-top: 10px; font-style: italic; text-align: justify; }' +
+        '  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }' +
         '}';
       document.head.appendChild(printStyle);
 

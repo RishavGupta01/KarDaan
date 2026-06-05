@@ -94,6 +94,16 @@
         }
       }
 
+      // House Property Set-off rules
+      var hpSetOff = hpIncome;
+      if (hpIncome < 0) {
+        if (regime === 'new') {
+          hpSetOff = 0; // Disallowed to set off against other heads in New Regime
+        } else {
+          hpSetOff = Math.max(hpIncome, -200000); // Capped at 2 Lakhs loss set-off in Old Regime
+        }
+      }
+
       // Business & Professional Income
       var businessIncome = 0;
       if (incomeData.business) {
@@ -116,39 +126,163 @@
         }
       }
 
-      // Capital Gains (Gains must be pre-set-off via CapitalGainsCalculator)
-      var capitalGainsNet = { stcg: 0, ltcg: 0, taxableLtcgListed: 0 };
+      // Capital Gains (Detailed classification and Section 70/74 set-off rules)
+      var setoffDetails = {
+        initial: {
+          listedLtcg: 0,
+          listedLtcgLoss: 0,
+          otherLtcg: 0,
+          otherLtcgLoss: 0,
+          listedStcg: 0,
+          listedStcgLoss: 0,
+          slabStcg: 0,
+          slabStcgLoss: 0
+        },
+        applied: {
+          ltclAgainstOtherLtcg: 0,
+          ltclAgainstListedLtcg: 0,
+          stclAgainstSlabStcg: 0,
+          stclAgainstListedStcg: 0,
+          stclAgainstOtherLtcg: 0,
+          stclAgainstListedLtcg: 0
+        },
+        final: {
+          listedLtcg: 0,
+          otherLtcg: 0,
+          listedStcg: 0,
+          slabStcg: 0,
+          stclCarryForward: 0,
+          ltclCarryForward: 0
+        }
+      };
+
       if (incomeData.capitalGains) {
-        var cgList = [];
         var cg = incomeData.capitalGains;
         
-        if (cg.listed) {
-          cgList.push({ assetType: 'listed', buyDate: '2024-01-01', sellDate: '2025-01-01', sellPrice: cg.listed.ltcg || 0, buyPrice: 0, classification: 'LTCG', grossGains: cg.listed.ltcg || 0 });
-          cgList.push({ assetType: 'listed', buyDate: '2024-01-01', sellDate: '2024-06-01', sellPrice: cg.listed.stcg || 0, buyPrice: 0, classification: 'STCG', grossGains: cg.listed.stcg || 0 });
-        }
-        if (cg.property) {
-          cgList.push({ assetType: 'property', buyDate: '2020-01-01', sellDate: '2025-01-01', sellPrice: cg.property.ltcg || 0, buyPrice: 0, classification: 'LTCG', grossGains: cg.property.ltcg || 0 });
-          cgList.push({ assetType: 'property', buyDate: '2024-01-01', sellDate: '2024-06-01', sellPrice: cg.property.stcg || 0, buyPrice: 0, classification: 'STCG', grossGains: cg.property.stcg || 0 });
-        }
-        if (cg.gold) {
-          cgList.push({ assetType: 'gold', buyDate: '2020-01-01', sellDate: '2025-01-01', sellPrice: cg.gold.ltcg || 0, buyPrice: 0, classification: 'LTCG', grossGains: cg.gold.ltcg || 0 });
-          cgList.push({ assetType: 'gold', buyDate: '2024-01-01', sellDate: '2024-06-01', sellPrice: cg.gold.stcg || 0, buyPrice: 0, classification: 'STCG', grossGains: cg.gold.stcg || 0 });
-        }
-        if (cg.unlisted) {
-          cgList.push({ assetType: 'unlisted', buyDate: '2020-01-01', sellDate: '2025-01-01', sellPrice: cg.unlisted.ltcg || 0, buyPrice: 0, classification: 'LTCG', grossGains: cg.unlisted.ltcg || 0 });
-          cgList.push({ assetType: 'unlisted', buyDate: '2024-01-01', sellDate: '2024-06-01', sellPrice: cg.unlisted.stcg || 0, buyPrice: 0, classification: 'STCG', grossGains: cg.unlisted.stcg || 0 });
-        }
-        if (cg.debt) {
-          cgList.push({ assetType: 'debtFunds', buyDate: '2020-01-01', sellDate: '2025-01-01', sellPrice: cg.debt.gains || 0, buyPrice: 0, classification: 'STCG', grossGains: cg.debt.gains || 0 });
+        var listedLtcgVal = Number(cg.listed ? cg.listed.ltcg || 0 : 0);
+        var listedStcgVal = Number(cg.listed ? cg.listed.stcg || 0 : 0);
+        var propertyLtcgVal = Number(cg.property ? cg.property.ltcg || 0 : 0);
+        var propertyStcgVal = Number(cg.property ? cg.property.stcg || 0 : 0);
+        var goldLtcgVal = Number(cg.gold ? cg.gold.ltcg || 0 : 0);
+        var goldStcgVal = Number(cg.gold ? cg.gold.stcg || 0 : 0);
+        var debtGainsVal = Number(cg.debt ? cg.debt.gains || 0 : 0);
+
+        var listedLtcgGains = Math.max(0, listedLtcgVal);
+        var listedLtcgLoss = Math.max(0, -listedLtcgVal);
+        var listedStcgGains = Math.max(0, listedStcgVal);
+        var listedStcgLoss = Math.max(0, -listedStcgVal);
+
+        var otherLtcgGains = Math.max(0, propertyLtcgVal) + Math.max(0, goldLtcgVal);
+        var otherLtcgLoss = Math.max(0, -propertyLtcgVal) + Math.max(0, -goldLtcgVal);
+
+        var slabStcgGains = Math.max(0, propertyStcgVal) + Math.max(0, goldStcgVal) + Math.max(0, debtGainsVal);
+        var slabStcgLoss = Math.max(0, -propertyStcgVal) + Math.max(0, -goldStcgVal);
+
+        setoffDetails.initial = {
+          listedLtcg: listedLtcgGains,
+          listedLtcgLoss: listedLtcgLoss,
+          otherLtcg: otherLtcgGains,
+          otherLtcgLoss: otherLtcgLoss,
+          listedStcg: listedStcgGains,
+          listedStcgLoss: listedStcgLoss,
+          slabStcg: slabStcgGains,
+          slabStcgLoss: slabStcgLoss
+        };
+
+        // 1. Set off LTCL against LTCG
+        var totalLtcl = listedLtcgLoss + otherLtcgLoss;
+        var remainingOtherLtcg = otherLtcgGains;
+        var remainingListedLtcg = listedLtcgGains;
+
+        if (totalLtcl > 0) {
+          // Set off against otherLtcg first (12.5% rate, no exemption) to preserve listedLtcg exemption
+          if (remainingOtherLtcg >= totalLtcl) {
+            setoffDetails.applied.ltclAgainstOtherLtcg = totalLtcl;
+            remainingOtherLtcg -= totalLtcl;
+            totalLtcl = 0;
+          } else {
+            setoffDetails.applied.ltclAgainstOtherLtcg = remainingOtherLtcg;
+            totalLtcl -= remainingOtherLtcg;
+            remainingOtherLtcg = 0;
+            
+            // Set off against listedLtcg
+            if (remainingListedLtcg >= totalLtcl) {
+              setoffDetails.applied.ltclAgainstListedLtcg = totalLtcl;
+              remainingListedLtcg -= totalLtcl;
+              totalLtcl = 0;
+            } else {
+              setoffDetails.applied.ltclAgainstListedLtcg = remainingListedLtcg;
+              totalLtcl -= remainingListedLtcg;
+              remainingListedLtcg = 0;
+            }
+          }
         }
 
-        var netCg = window.CapitalGainsCalculator.computeNetCapitalGains(cgList);
-        capitalGainsNet.stcg = netCg.stcg;
-        capitalGainsNet.ltcg = netCg.ltcg;
-        
-        // Specifically identify LTCG on listed equity which has ₹1.25L exemption
-        var listedLTCG = cg.listed ? Number(cg.listed.ltcg || 0) : 0;
-        capitalGainsNet.taxableLtcgListed = Math.max(0, listedLTCG - TD.capitalGains.listed.ltcgExemption);
+        // 2. Set off STCL
+        var totalStcl = listedStcgLoss + slabStcgLoss;
+        var remainingSlabStcg = slabStcgGains;
+        var remainingListedStcg = listedStcgGains;
+
+        if (totalStcl > 0) {
+          // A. Slab STCG first (taxed at progressive rates)
+          if (remainingSlabStcg >= totalStcl) {
+            setoffDetails.applied.stclAgainstSlabStcg = totalStcl;
+            remainingSlabStcg -= totalStcl;
+            totalStcl = 0;
+          } else {
+            setoffDetails.applied.stclAgainstSlabStcg = remainingSlabStcg;
+            totalStcl -= remainingSlabStcg;
+            remainingSlabStcg = 0;
+          }
+
+          // B. Listed STCG next (20% rate)
+          if (totalStcl > 0) {
+            if (remainingListedStcg >= totalStcl) {
+              setoffDetails.applied.stclAgainstListedStcg = totalStcl;
+              remainingListedStcg -= totalStcl;
+              totalStcl = 0;
+            } else {
+              setoffDetails.applied.stclAgainstListedStcg = remainingListedStcg;
+              totalStcl -= remainingListedStcg;
+              remainingListedStcg = 0;
+            }
+          }
+
+          // C. Other LTCG next (12.5% rate, no exemption)
+          if (totalStcl > 0) {
+            if (remainingOtherLtcg >= totalStcl) {
+              setoffDetails.applied.stclAgainstOtherLtcg = totalStcl;
+              remainingOtherLtcg -= totalStcl;
+              totalStcl = 0;
+            } else {
+              setoffDetails.applied.stclAgainstOtherLtcg = remainingOtherLtcg;
+              totalStcl -= remainingOtherLtcg;
+              remainingOtherLtcg = 0;
+            }
+          }
+
+          // D. Listed LTCG last (12.5% rate, has ₹1.25L exemption)
+          if (totalStcl > 0) {
+            if (remainingListedLtcg >= totalStcl) {
+              setoffDetails.applied.stclAgainstListedLtcg = totalStcl;
+              remainingListedLtcg -= totalStcl;
+              totalStcl = 0;
+            } else {
+              setoffDetails.applied.stclAgainstListedLtcg = remainingListedLtcg;
+              totalStcl -= remainingListedLtcg;
+              remainingListedLtcg = 0;
+            }
+          }
+        }
+
+        setoffDetails.final = {
+          listedLtcg: remainingListedLtcg,
+          otherLtcg: remainingOtherLtcg,
+          listedStcg: remainingListedStcg,
+          slabStcg: remainingSlabStcg,
+          stclCarryForward: totalStcl,
+          ltclCarryForward: totalLtcl
+        };
       }
 
       // Other Sources
@@ -163,14 +297,11 @@
         otherGross += Number(os.other || 0);
       }
 
-      var hpSetOff = hpIncome;
-      if (regime === 'new') {
-        if (hpSetOff < 0) hpSetOff = 0;
-      } else {
-        if (hpSetOff < 0) hpSetOff = -Math.min(Math.abs(hpSetOff), 200000);
-      }
-
-      var grossTotalIncome = salaryNet + hpSetOff + businessIncome + otherGross;
+      var grossTotalIncome = salaryNet + hpSetOff + businessIncome + otherGross + 
+                             setoffDetails.final.slabStcg + 
+                             setoffDetails.final.listedStcg + 
+                             setoffDetails.final.listedLtcg + 
+                             setoffDetails.final.otherLtcg;
 
       return {
         heads: {
@@ -181,10 +312,15 @@
           hpSetOff: hpSetOff,
           hpDetails: hpDetails,
           business: businessIncome,
-          stcg: capitalGainsNet.stcg,
-          ltcg: capitalGainsNet.ltcg,
-          taxableLtcgListed: capitalGainsNet.taxableLtcgListed,
-          otherSources: otherGross
+          stcg: setoffDetails.final.slabStcg + setoffDetails.final.listedStcg,
+          ltcg: setoffDetails.final.listedLtcg + setoffDetails.final.otherLtcg,
+          stcgListed: setoffDetails.final.listedStcg,
+          stcgSlab: setoffDetails.final.slabStcg,
+          ltcgListed: setoffDetails.final.listedLtcg,
+          ltcgOther: setoffDetails.final.otherLtcg,
+          taxableLtcgListed: Math.max(0, setoffDetails.final.listedLtcg - TD.capitalGains.listed.ltcgExemption),
+          otherSources: otherGross,
+          setoffDetails: setoffDetails
         },
         grossTotalIncome: grossTotalIncome
       };
@@ -279,9 +415,56 @@
      * @param {Object} userData
      * @returns {Object} Tax results for both regimes
      */
+    /**
+     * Compute Section 234B & 234C interest for advance tax default/deferment.
+     * @param {number} netTax
+     * @param {number} totalTds
+     * @param {number} advanceTaxPaid
+     * @returns {Object} interest details
+     */
+    computeAdvanceTaxInterest: function (netTax, totalTds, advanceTaxPaid) {
+      var assessedTax = Math.max(0, netTax - totalTds);
+      if (assessedTax < 10000) {
+        return { interest234B: 0, interest234C: 0, totalInterest: 0 };
+      }
+
+      // June 15: 15% due, 0 paid (assumes paid at end)
+      var interestC_Q1 = assessedTax * 0.15 * 0.01 * 3;
+      // Sept 15: 45% due, 0 paid
+      var interestC_Q2 = assessedTax * 0.45 * 0.01 * 3;
+      // Dec 15: 75% due, 0 paid
+      var interestC_Q3 = assessedTax * 0.75 * 0.01 * 3;
+      // March 15: 100% due, advanceTaxPaid paid
+      var shortfallQ4 = Math.max(0, assessedTax - advanceTaxPaid);
+      var interestC_Q4 = shortfallQ4 * 0.01 * 1;
+
+      var interest234C = Math.round(interestC_Q1 + interestC_Q2 + interestC_Q3 + interestC_Q4);
+
+      var interest234B = 0;
+      if (advanceTaxPaid < assessedTax * 0.90) {
+        var shortfallB = Math.max(0, assessedTax - advanceTaxPaid);
+        interest234B = Math.round(shortfallB * 0.01 * 4); // 4 months: April to July
+      }
+
+      return {
+        interest234B: interest234B,
+        interest234C: interest234C,
+        totalInterest: interest234B + interest234C
+      };
+    },
+
+    /**
+     * Compute tax liability for a user.
+     * @param {Object} userData
+     * @returns {Object} Tax results for both regimes
+     */
     computeFullTax: function (userData) {
       var age = Number(userData.profile.age || 30);
       var ageCategory = window.Utils.getAgeCategory(age);
+      var paid = userData.taxesPaid || {};
+      var salaryTds = (userData.income && userData.income.salary) ? Number(userData.income.salary.tds || 0) : 0;
+      var totalTds = salaryTds + Number(paid.tds || 0);
+      var advanceTaxPaid = Number(paid.advanceTax || 0);
 
       // 1. COMPUTE NEW TAX REGIME
       var newGross = this.computeGrossIncome(userData.income, 'new', ageCategory);
@@ -295,19 +478,19 @@
         newDeductions = Math.min(claimed80CCD2, limit80CCD2New);
       }
 
-      var newTaxableSlabIncome = Math.max(0, newGross.grossTotalIncome - newDeductions);
+      var newTaxableSlabIncome = Math.max(0, (newGross.heads.salaryNet + newGross.heads.hpSetOff + newGross.heads.business + newGross.heads.otherSources + newGross.heads.stcgSlab) - newDeductions);
       var newSlabTax = this.computeSlabTax(newTaxableSlabIncome, TD.newRegime.slabs);
 
       // Capital gains tax (New Regime)
-      var newSTCG_tax = newGross.heads.stcg * TD.capitalGains.listed.stcgRate;
-      var newLTCG_tax = newGross.heads.taxableLtcgListed * TD.capitalGains.listed.ltcgRate;
+      var newSTCG_tax = newGross.heads.stcgListed * TD.capitalGains.listed.stcgRate;
+      var newLTCG_tax = newGross.heads.taxableLtcgListed * TD.capitalGains.listed.ltcgRate + newGross.heads.ltcgOther * 0.125;
       var newCGTax = newSTCG_tax + newLTCG_tax;
 
       var newTaxBeforeRebate = newSlabTax + newCGTax;
 
       // Section 87A rebate for new regime (Enhanced in Budget 2025 to 12 Lakhs)
       var newRebate = 0;
-      var totalTaxableIncomeNew = newTaxableSlabIncome + newGross.heads.stcg + newGross.heads.ltcg;
+      var totalTaxableIncomeNew = newTaxableSlabIncome + newGross.heads.stcgListed + newGross.heads.taxableLtcgListed + newGross.heads.ltcgOther;
       
       if (totalTaxableIncomeNew <= TD.newRegime.rebate87A.limit) {
         // Section 87A rebate is capped at the tax on slab income + tax on STCG (not allowed on listed LTCG 112A)
@@ -331,25 +514,29 @@
       var newCess = (newTaxAfterRebate + newSurcharge) * TD.cess;
       var newNetTax = newTaxAfterRebate + newSurcharge + newCess;
 
+      // Penal Interest 234B & 234C
+      var newInterest = this.computeAdvanceTaxInterest(newNetTax, totalTds, advanceTaxPaid);
+      var finalNewNetTax = newNetTax + newInterest.totalInterest;
+
       // 2. COMPUTE OLD TAX REGIME
       var oldGross = this.computeGrossIncome(userData.income, 'old', ageCategory);
       var oldDeductionsResult = this.computeDeductionsOldRegime(userData.deductions || {}, oldGross.heads, ageCategory);
       
-      var oldTaxableSlabIncome = Math.max(0, oldGross.grossTotalIncome - oldDeductionsResult.total);
+      var oldTaxableSlabIncome = Math.max(0, (oldGross.heads.salaryNet + oldGross.heads.hpSetOff + oldGross.heads.business + oldGross.heads.otherSources + oldGross.heads.stcgSlab) - oldDeductionsResult.total);
       
       var oldSlabs = this.getOldRegimeSlabs(ageCategory);
       var oldSlabTax = this.computeSlabTax(oldTaxableSlabIncome, oldSlabs);
 
       // Capital gains tax (Old Regime)
-      var oldSTCG_tax = oldGross.heads.stcg * TD.capitalGains.listed.stcgRate;
-      var oldLTCG_tax = oldGross.heads.taxableLtcgListed * TD.capitalGains.listed.ltcgRate;
+      var oldSTCG_tax = oldGross.heads.stcgListed * TD.capitalGains.listed.stcgRate;
+      var oldLTCG_tax = oldGross.heads.taxableLtcgListed * TD.capitalGains.listed.ltcgRate + oldGross.heads.ltcgOther * 0.125;
       var oldCGTax = oldSTCG_tax + oldLTCG_tax;
 
       var oldTaxBeforeRebate = oldSlabTax + oldCGTax;
 
       // Section 87A rebate for old regime (limit: 5 Lakhs)
       var oldRebate = 0;
-      var totalTaxableIncomeOld = oldTaxableSlabIncome + oldGross.heads.stcg + oldGross.heads.ltcg;
+      var totalTaxableIncomeOld = oldTaxableSlabIncome + oldGross.heads.stcgListed + oldGross.heads.taxableLtcgListed + oldGross.heads.ltcgOther;
       if (totalTaxableIncomeOld <= TD.oldRegime.rebate87A.limit) {
         oldRebate = Math.min(oldTaxBeforeRebate, TD.oldRegime.rebate87A.maxRebate);
       }
@@ -372,9 +559,13 @@
       var oldCess = (oldTaxAfterRebate + oldSurcharge) * TD.cess;
       var oldNetTax = oldTaxAfterRebate + oldSurcharge + oldCess;
 
+      // Penal Interest 234B & 234C
+      var oldInterest = this.computeAdvanceTaxInterest(oldNetTax, totalTds, advanceTaxPaid);
+      var finalOldNetTax = oldNetTax + oldInterest.totalInterest;
+
       // Determine recommended regime
-      var recommended = newNetTax <= oldNetTax ? 'new' : 'old';
-      var savings = Math.abs(oldNetTax - newNetTax);
+      var recommended = finalNewNetTax <= finalOldNetTax ? 'new' : 'old';
+      var savings = Math.abs(finalOldNetTax - finalNewNetTax);
 
       return {
         newRegime: {
@@ -382,12 +573,17 @@
           standardDeduction: newGross.heads.salaryStdDeduction,
           otherDeductions: newDeductions,
           taxableSlabIncome: newTaxableSlabIncome,
+          totalTaxableIncome: totalTaxableIncomeNew,
           slabTax: newSlabTax,
           capitalGainsTax: newCGTax,
           rebate87A: newRebate,
           surcharge: newSurcharge,
           cess: newCess,
-          netTax: newNetTax,
+          interest234B: newInterest.interest234B,
+          interest234C: newInterest.interest234C,
+          interestTotal: newInterest.totalInterest,
+          netTaxBeforeInterest: newNetTax,
+          netTax: finalNewNetTax,
           heads: newGross.heads
         },
         oldRegime: {
@@ -396,12 +592,17 @@
           otherDeductions: oldDeductionsResult.total,
           deductionsBreakdown: oldDeductionsResult.breakdown,
           taxableSlabIncome: oldTaxableSlabIncome,
+          totalTaxableIncome: totalTaxableIncomeOld,
           slabTax: oldSlabTax,
           capitalGainsTax: oldCGTax,
           rebate87A: oldRebate,
           surcharge: oldSurcharge,
           cess: oldCess,
-          netTax: oldNetTax,
+          interest234B: oldInterest.interest234B,
+          interest234C: oldInterest.interest234C,
+          interestTotal: oldInterest.totalInterest,
+          netTaxBeforeInterest: oldNetTax,
+          netTax: finalOldNetTax,
           heads: oldGross.heads
         },
         recommended: recommended,
