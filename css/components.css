@@ -370,7 +370,7 @@
 }
 
 .checkbox-custom::after {
-  content: '✓';
+  content: '';
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   display: none;

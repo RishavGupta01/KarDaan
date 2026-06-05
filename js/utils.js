@@ -240,10 +240,10 @@
 
       var toast = this.createElement('div', 'toast toast-' + type);
       
-      var icon = 'ℹ️';
-      if (type === 'success') icon = '✅';
-      if (type === 'error') icon = '❌';
-      if (type === 'warning') icon = '⚠️';
+      var icon = '';
+      if (type === 'success') icon = '';
+      if (type === 'error') icon = '';
+      if (type === 'warning') icon = '';
 
       toast.innerHTML = '<span>' + icon + '</span><span class="toast-message">' + message + '</span>';
       container.appendChild(toast);

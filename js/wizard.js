@@ -163,19 +163,19 @@
       var footer = window.Utils.createElement('div', 'wizard-footer');
 
       if (step.id === 'welcome') {
-        var startBtn = window.Utils.createElement('button', 'btn btn-primary btn-lg', 'Start Assessment ➔');
+        var startBtn = window.Utils.createElement('button', 'btn btn-primary btn-lg', 'Start Assessment ');
         startBtn.onclick = function () { window.TaxWizard.nextStep(); };
         footer.appendChild(window.Utils.createElement('div')); // filler
         footer.appendChild(startBtn);
       } else if (step.id === 'results') {
-        var restartBtn = window.Utils.createElement('button', 'btn btn-secondary', '🔄 Assess Again');
+        var restartBtn = window.Utils.createElement('button', 'btn btn-secondary', ' Assess Again');
         restartBtn.onclick = function () {
           window.Utils.clearLocalStorage('kardaan_draft');
           window.location.reload();
         };
         footer.appendChild(restartBtn);
 
-        var printBtn = window.Utils.createElement('button', 'btn btn-success', '💾 Save Report (PDF)');
+        var printBtn = window.Utils.createElement('button', 'btn btn-success', ' Save Report (PDF)');
         printBtn.onclick = function () {
           var taxRes = window.TaxEngine.computeFullTax(state);
           var suggs = window.TaxOptimizer.optimize(state, taxRes);
@@ -187,7 +187,7 @@
         backBtn.onclick = function () { window.TaxWizard.prevStep(); };
         footer.appendChild(backBtn);
 
-        var label = step.id === 'review' ? 'Calculate Tax ➔' : 'Continue ➔';
+        var label = step.id === 'review' ? 'Calculate Tax ' : 'Continue ';
         var nextBtn = window.Utils.createElement('button', 'btn btn-primary', label);
         nextBtn.onclick = function () { window.TaxWizard.nextStep(); };
         footer.appendChild(nextBtn);
@@ -256,24 +256,36 @@
     render_welcome: function (el) {
       el.innerHTML = 
         '<div class="text-center animate-fade-in-up" style="padding: var(--space-8) 0;">' +
-        '  <span style="font-size: 64px;">🇮🇳</span>' +
+        '  <span style="font-size: 64px; font-weight: 800; color: var(--color-primary-400);">IN</span>' +
         '  <h1 class="text-gradient-hero" style="font-size: var(--font-size-5xl); margin-top: 15px;">KarDaan</h1>' +
         '  <p style="font-size: var(--font-size-lg); max-width: 600px; margin: 15px auto var(--space-8);">' +
         '    Your premium, end-to-end Indian Tax assistant. Simplify your filing, compare Old vs New regimes, and optimize your taxes legally for FY 2025-26.' +
         '  </p>' +
         '  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); max-width: 700px; margin: 0 auto;">' +
         '    <div class="card glass-light" style="padding: 20px;">' +
-        '      <span style="font-size: 24px;">🔒</span>' +
+        '      <div style="margin-bottom: 10px;">' +
+        '        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px; margin: 0 auto; color: var(--color-primary-400);">' +
+        '          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />' +
+        '        </svg>' +
+        '      </div>' +
         '      <h4 style="margin: 10px 0 5px;">100% Private</h4>' +
         '      <p style="font-size: 12px; margin: 0;">All computations occur client-side. No financial data leaves your device.</p>' +
         '    </div>' +
         '    <div class="card glass-light" style="padding: 20px;">' +
-        '      <span style="font-size: 24px;">⚡</span>' +
+        '      <div style="margin-bottom: 10px;">' +
+        '        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px; margin: 0 auto; color: var(--color-accent-400);">' +
+        '          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-9L21 12m0 0-4.5 4.5M21 12H7.5" />' +
+        '        </svg>' +
+        '      </div>' +
         '      <h4 style="margin: 10px 0 5px;">Dual Regime</h4>' +
         '      <p style="font-size: 12px; margin: 0;">Instantly compare New vs Old tax slabs under Budget 2025 rules.</p>' +
         '    </div>' +
         '    <div class="card glass-light" style="padding: 20px;">' +
-        '      <span style="font-size: 24px;">💡</span>' +
+        '      <div style="margin-bottom: 10px;">' +
+        '        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 28px; height: 28px; margin: 0 auto; color: var(--color-warning-400);">' +
+        '          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3.091 15.09 8.187 14.28 9 9l.813 5.28 5.096.81-5.096.814ZM19.071 5.929a.75.75 0 0 1 0 1.06l-.53.53a.75.75 0 0 1-1.06 0l-.53-.53a.75.75 0 0 1 0-1.06l.53-.53a.75.75 0 0 1 1.06 0l.53.53ZM16.5 16.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />' +
+        '        </svg>' +
+        '      </div>' +
         '      <h4 style="margin: 10px 0 5px;">Optimization</h4>' +
         '      <p style="font-size: 12px; margin: 0;">Get recommendations to legally lower your tax outgo.</p>' +
         '    </div>' +
@@ -317,27 +329,47 @@
         '<p class="card-subtitle">Select all applicable sources of income for the year.</p>' +
         '<div class="option-grid grid-3 stagger-children" style="margin-top: 20px;">' +
         '  <div class="option-card ' + (state.selectedIncomes.salary ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
-        '    <span class="option-icon">💼</span>' +
+        '    <span class="option-icon">' +
+        '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
+        '        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875A1.125 1.125 0 0 1 3.75 18.4v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.45.258-.717.258H4.875a1.002 1.002 0 0 1-.717-.258m16.5 0c.29-.247.467-.61.467-.99V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m0 0V5.25c0-1.03-.83-1.875-1.875-1.875H10.5C9.455 3.375 8.625 4.205 8.625 5.25v1.281m8.625 0a48.112 48.112 0 0 1-8.625 0m0 0A48.114 48.114 0 0 0 5.213 6.531C4.144 6.69 3.375 7.625 3.375 8.706v4.783c0 .38.177.744.467.99m0 0a2.18 2.18 0 0 1 .717-.258H19.5" />' +
+        '      </svg>' +
+        '    </span>' +
         '    <span class="option-title">Salaried / Pensioner</span>' +
         '    <span class="option-desc">Receives Form 16, standard deductions.</span>' +
         '  </div>' +
         '  <div class="option-card ' + (state.selectedIncomes.property ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
-        '    <span class="option-icon">🏠</span>' +
+        '    <span class="option-icon">' +
+        '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
+        '        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />' +
+        '      </svg>' +
+        '    </span>' +
         '    <span class="option-title">House Property</span>' +
         '    <span class="option-desc">Rental income or paying interest on home loan.</span>' +
         '  </div>' +
         '  <div class="option-card ' + (state.selectedIncomes.gains ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
-        '    <span class="option-icon">📈</span>' +
+        '    <span class="option-icon">' +
+        '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
+        '        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-3.793-.772m3.793.772-1.217 3.793" />' +
+        '      </svg>' +
+        '    </span>' +
         '    <span class="option-title">Capital Gains</span>' +
         '    <span class="option-desc">Shares, Mutual Funds, Gold, Real Estate sales.</span>' +
         '  </div>' +
         '  <div class="option-card ' + (state.selectedIncomes.business ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
-        '    <span class="option-icon">🏢</span>' +
+        '    <span class="option-icon">' +
+        '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
+        '        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />' +
+        '      </svg>' +
+        '    </span>' +
         '    <span class="option-title">Business / Profession</span>' +
         '    <span class="option-desc">Small traders, doctors, lawyers, freelancers, regular business.</span>' +
         '  </div>' +
         '  <div class="option-card ' + (state.selectedIncomes.other ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
-        '    <span class="option-icon">💰</span>' +
+        '    <span class="option-icon">' +
+        '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
+        '        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v10m-3-7h6m-5.25-1.5h4.5M12 5.25v1.5M12 17.25v1.5" />' +
+        '      </svg>' +
+        '    </span>' +
         '    <span class="option-title">Other Sources</span>' +
         '    <span class="option-desc">FD/Savings interest, Dividends, Lottery, Gifts.</span>' +
         '  </div>' +
@@ -434,7 +466,7 @@
         '<h2>4. House Property Income / Loss</h2>' +
         '<p class="card-subtitle">Add details for owned properties and loan interest.</p>' +
         '<div id="hp-properties-container" style="margin-top: 20px;">' + propHtml + '</div>' +
-        '<button class="btn btn-secondary btn-sm" id="btn-add-property" style="margin-top: 10px;">➕ Add Another Property</button>';
+        '<button class="btn btn-secondary btn-sm" id="btn-add-property" style="margin-top: 10px;">+ Add Another Property</button>';
 
       // Bind dynamic events
       var containerDiv = el.querySelector('#hp-properties-container');
@@ -469,7 +501,7 @@
         '<p class="card-subtitle">Declare gains/losses from equity, real estate, and gold transactions.</p>' +
         '<div style="display: flex; flex-direction: column; gap: var(--space-6); margin-top: 20px;">' +
         '  <div class="card glass-light" style="padding: 20px;">' +
-        '    <h4 style="margin-bottom: 12px;">📊 Listed Shares / Equity Mutual Funds</h4>' +
+        '    <h4 style="margin-bottom: 12px;"> Listed Shares / Equity Mutual Funds</h4>' +
         '    <div class="income-input-row">' +
         '      <div class="form-group">' +
         '        <label class="form-label">STCG (Short-Term - sold within 1 yr)</label>' +
@@ -486,7 +518,7 @@
         '    </div>' +
         '  </div>' +
         '  <div class="card glass-light" style="padding: 20px;">' +
-        '    <h4 style="margin-bottom: 12px;">🏠 Property / Real Estate</h4>' +
+        '    <h4 style="margin-bottom: 12px;"> Property / Real Estate</h4>' +
         '    <div class="income-input-row">' +
         '      <div class="form-group">' +
         '        <label class="form-label">STCG (sold within 2 yrs)</label>' +
@@ -503,7 +535,7 @@
         '    </div>' +
         '  </div>' +
         '  <div class="card glass-light" style="padding: 20px;">' +
-        '    <h4 style="margin-bottom: 12px;">🪙 Gold / Jewels / Other Assets</h4>' +
+        '    <h4 style="margin-bottom: 12px;"> Gold / Jewels / Other Assets</h4>' +
         '    <div class="income-input-row">' +
         '      <div class="form-group">' +
         '        <label class="form-label">STCG (sold within 2 yrs)</label>' +
@@ -520,7 +552,7 @@
         '    </div>' +
         '  </div>' +
         '  <div class="card glass-light" style="padding: 20px;">' +
-        '    <h4 style="margin-bottom: 12px;">💸 Debt Mutual Funds / Bonds</h4>' +
+        '    <h4 style="margin-bottom: 12px;"> Debt Mutual Funds / Bonds</h4>' +
         '    <div class="form-group" style="max-width: 50%;">' +
         '      <label class="form-label">Total Debt Gains (Always taxed at slab rate)</label>' +
         '      <div class="input-container"><span class="input-prefix">₹</span>' +
@@ -661,7 +693,7 @@
 
         // 80C
         '  <div class="category-group">' +
-        '    <div class="category-header">📦 Section 80C - Core Investments (Limit: ₹1.5L) <span>▼</span></div>' +
+        '    <div class="category-header"> Section 80C - Core Investments (Limit: ₹1.5L) <span>▼</span></div>' +
         '    <div class="category-content">' +
         '      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">Includes PPF, ELSS mutual funds, EPF share, life insurance premium, home loan principal repaid, and school tuition fees.</p>' +
         '      <div class="income-input-row">' +
@@ -677,7 +709,7 @@
 
         // 80D
         '  <div class="category-group">' +
-        '    <div class="category-header">🏥 Section 80D - Health Insurance Slabs <span>▼</span></div>' +
+        '    <div class="category-header"> Section 80D - Health Insurance Slabs <span>▼</span></div>' +
         '    <div class="category-content">' +
         '      <div class="income-input-row">' +
         '        <div class="form-group">' +
@@ -703,7 +735,7 @@
 
         // NPS
         '  <div class="category-group">' +
-        '    <div class="category-header">👵 Sections 80CCD - National Pension System (NPS) <span>▼</span></div>' +
+        '    <div class="category-header"> Sections 80CCD - National Pension System (NPS) <span>▼</span></div>' +
         '    <div class="category-content">' +
         '      <div class="income-input-row">' +
         '        <div class="form-group">' +
@@ -725,7 +757,7 @@
 
         // Others
         '  <div class="category-group">' +
-        '    <div class="category-header">🎓 Other Deductions (80E, 80G, 80GG) <span>▼</span></div>' +
+        '    <div class="category-header"> Other Deductions (80E, 80G, 80GG) <span>▼</span></div>' +
         '    <div class="category-content">' +
         '      <div class="income-input-row">' +
         '        <div class="form-group">' +
@@ -824,7 +856,7 @@
       if (savings > 0) {
         dashboardHTML += 
           '<div class="recommendation-banner">' +
-          '  <span>🎉</span>' +
+          '  <span></span>' +
           '  <span>We recommend the <strong>' + (rec === 'new' ? 'New Regime' : 'Old Regime') + '</strong>. You will save <strong>' + window.Utils.formatCurrency(savings) + '</strong> in tax!</span>' +
           '</div>';
       }
@@ -851,11 +883,11 @@
       dashboardHTML += 
         '<div class="results-details">' +
         '  <div class="card">' +
-        '    <h3 style="margin-bottom: 20px;">📊 Slabs Comparison Chart</h3>' +
+        '    <h3 style="margin-bottom: 20px;"> Slabs Comparison Chart</h3>' +
         '    <div style="height: 200px; width: 100%;"><canvas id="res-bar-chart" style="width:100%; height:100%;"></canvas></div>' +
         '  </div>' +
         '  <div class="card">' +
-        '    <h3 style="margin-bottom: 20px;">💡 Recommended Optimization Ideas</h3>' +
+        '    <h3 style="margin-bottom: 20px;"> Recommended Optimization Ideas</h3>' +
         '    <div class="optimization-grid" id="dashboard-opts"></div>' +
         '  </div>' +
         '</div>';

@@ -274,7 +274,7 @@
       
       if (savings > 0) {
         html += '  <div class="alert alert-success gap-2 items-center" style="margin-top: 15px; padding: 10px; font-size: 11px;">';
-        html += '    <span>🎉</span>';
+        html += '    <span></span>';
         html += '    <span>Recommended: <strong>' + (rec === 'new' ? 'New Regime' : 'Old Regime') + '</strong> (Saves ' + window.Utils.formatCurrencyShort(savings) + ')</span>';
         html += '  </div>';
       }

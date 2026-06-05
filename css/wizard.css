@@ -189,7 +189,7 @@
 }
 
 .option-card::after {
-  content: '✓';
+  content: '';
   position: absolute;
   top: var(--space-4);
   right: var(--space-4);
@@ -385,7 +385,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-primary-400);
   flex-shrink: 0;
 }
 

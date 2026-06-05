@@ -67,7 +67,7 @@
           risk: 'zero',
           deadline: 'At the time of filing (July 31, 2026)',
           howToImplement: 'Select the "' + (otherRegime === 'new' ? 'New Regime' : 'Old Regime') + '" checkbox when starting your ITR filing on the Income Tax Portal.',
-          icon: '🔄'
+          icon: 'TAX'
         });
       }
 
@@ -99,7 +99,7 @@
             risk: 'low',
             deadline: '31 March 2026',
             howToImplement: 'Invest in ELSS (Equity Linked Savings Schemes) mutual funds for high returns (3-year lock-in) or PPF (Public Provident Fund) for safe risk-free interest (15-year lock-in).',
-            icon: '🏦'
+            icon: '80C'
           });
         }
 
@@ -123,7 +123,7 @@
             risk: 'low',
             deadline: '31 March 2026',
             howToImplement: 'Open an NPS Tier-1 account online through eNPS portal or your bank and deposit up to ₹50,000.',
-            icon: '👵'
+            icon: 'NPS'
           });
         }
 
@@ -147,7 +147,7 @@
             risk: 'zero',
             deadline: '31 March 2026',
             howToImplement: 'Buy or renew a health insurance policy and pay via online bank transfer, credit card or cheque (cash payments are not eligible for tax benefits).',
-            icon: '🏥'
+            icon: '80D'
           });
         }
 
@@ -171,7 +171,7 @@
             risk: 'zero',
             deadline: '31 March 2026',
             howToImplement: 'Purchase a health cover for parents or pay their existing policy renewals. Senior parents without health cover can claim medical expenditure up to ₹50,000.',
-            icon: '🧓'
+            icon: '80D'
           });
         }
 
@@ -196,7 +196,7 @@
             risk: 'zero',
             deadline: '31 July 2026',
             howToImplement: 'Add interest received from deposits under "Income from Other Sources" and claim the exact same amount under Section 80TTB.',
-            icon: '👴'
+            icon: 'TTB'
           });
         } else if (ageCategory === 'below60' && interestInOther > 0 && claimedTTA < Math.min(interestInOther, 10000)) {
           var remainingTTA = Math.min(interestInOther, 10000) - claimedTTA;
@@ -214,7 +214,7 @@
             risk: 'zero',
             deadline: '31 July 2026',
             howToImplement: 'Report your savings interest under "Other Sources" and claim the exemption under Section 80TTA.',
-            icon: '💳'
+            icon: 'TTA'
           });
         }
 
@@ -236,7 +236,7 @@
             risk: 'zero',
             deadline: '31 January 2026 (Employer submission) or 31 July 2026 (ITR filing)',
             howToImplement: 'Provide rent agreement, monthly rent receipts, and PAN of landlord (if annual rent > ₹1 Lakh) to your employer or claim directly in ITR.',
-            icon: '🏠'
+            icon: 'HRA'
           });
         }
       }
@@ -267,7 +267,7 @@
               risk: 'zero',
               deadline: 'Beginning of the FY / HR CTC window',
               howToImplement: 'Contact your HR/payroll team and request them to opt for the Corporate NPS Scheme, redirecting part of your special allowances into Employer NPS.',
-              icon: '🏢'
+              icon: 'CTC'
             });
           }
         }
