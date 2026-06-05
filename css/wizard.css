@@ -1,0 +1,426 @@
+/* ============================================================
+   KarDaan (कर-दान) — Wizard UI Styles
+   Premium Indian Tax Filing Assistant
+   ============================================================ */
+
+/* ── Stepper ────────────────────────────────────────────────── */
+.stepper-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  position: relative;
+  overflow-x: auto;
+  padding: var(--space-2) 0;
+}
+
+.stepper-container::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-secondary);
+  z-index: 1;
+}
+
+.stepper-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  padding: 0 var(--space-4);
+  background: transparent;
+}
+
+.step-bubble {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-normal);
+}
+
+.step-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Stepper States */
+.stepper-step.active .step-bubble {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.stepper-step.active .step-label {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.stepper-step.completed .step-bubble {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.stepper-step.completed .step-label {
+  color: var(--color-accent);
+}
+
+/* ── Wizard Layout ─────────────────────────────────────────── */
+.wizard-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+@media (min-width: 1024px) {
+  .wizard-layout {
+    grid-template-columns: 1fr 340px;
+  }
+}
+
+.wizard-main {
+  min-width: 0;
+}
+
+.wizard-sidebar {
+  position: sticky;
+  top: calc(var(--navbar-height) + var(--space-6));
+  align-self: start;
+}
+
+/* ── Wizard Body & Transitions ───────────────────────────────── */
+.wizard-card {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.wizard-body {
+  flex-grow: 1;
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-8);
+  animation: scaleIn 0.3s var(--ease-spring);
+}
+
+.wizard-footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border-primary);
+  padding-top: var(--space-6);
+}
+
+/* ── Option Selectors (Card Grids) ───────────────────────────── */
+.option-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .option-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .option-grid.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.option-card {
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: all var(--transition-fast);
+  position: relative;
+  text-align: left;
+}
+
+.option-card:hover {
+  background: var(--bg-elevated);
+  border-color: var(--color-primary-400);
+  transform: translateY(-2px);
+}
+
+.option-card.selected {
+  background: rgba(79, 70, 229, 0.08);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(79, 70, 229, 0.1);
+}
+
+.option-icon {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-1);
+}
+
+.option-title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.option-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  line-height: var(--line-height-normal);
+}
+
+.option-card::after {
+  content: '✓';
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  display: none;
+}
+
+.option-card.selected::after {
+  display: block;
+}
+
+/* ── Income/Exemption Input Items ───────────────────────────── */
+.income-input-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .income-input-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.section-divider {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  letter-spacing: var(--letter-spacing-wider);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.section-divider::after {
+  content: '';
+  flex-grow: 1;
+  height: 1px;
+  background: var(--border-secondary);
+}
+
+/* Collapsible Section Groups */
+.category-group {
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-primary);
+  overflow: hidden;
+}
+
+.category-header {
+  padding: var(--space-4);
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.category-header:hover {
+  background: var(--bg-elevated);
+}
+
+.category-content {
+  padding: var(--space-5);
+  background: var(--bg-input);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Summary Sidebar Panel ───────────────────────────────────── */
+.summary-panel {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.summary-title {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-secondary);
+  padding-bottom: var(--space-2);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}
+
+.summary-item.total {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  border-top: 1px solid var(--border-secondary);
+  padding-top: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ── Results Dashboard ────────────────────────────────────────── */
+.results-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.recommendation-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px dashed var(--color-accent);
+  border-radius: var(--radius-xl);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-6);
+  font-size: var(--font-size-base);
+  animation: pulse 3s infinite;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .results-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.results-details {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+@media (min-width: 1024px) {
+  .results-details {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.comparison-box {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+}
+
+/* ── Optimization Suggestion Cards ───────────────────────────── */
+.optimization-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.opt-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+  display: flex;
+  gap: var(--space-4);
+  transition: all var(--transition-fast);
+}
+
+.opt-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary-400);
+}
+
+.opt-icon-bubble {
+  background: var(--bg-elevated);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+}
+
+.opt-content {
+  flex-grow: 1;
+}
+
+.opt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+}
+
+.opt-title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+}
+
+.opt-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-normal);
+  margin-bottom: var(--space-3);
+}
+
+.opt-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.opt-savings-amount {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+}

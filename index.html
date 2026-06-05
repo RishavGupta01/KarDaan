@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>KarDaan — Premium Indian Tax Filing Assistant & Optimizer</title>
+  <meta name="description" content="Calculate, compare, and legally minimize your Indian Income Tax under the latest FY 2025-26 slabs. Guided step-by-step assistant with zero data storage.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/wizard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body data-theme="dark">
+
+  <!-- ── Navigation Header ────────────────────────────────────────── -->
+  <header class="navbar glass">
+    <a href="#home" class="nav-brand">
+      <div class="nav-logo-icon">कर</div>
+      <span class="text-gradient">KarDaan</span>
+    </a>
+    
+    <nav class="nav-menu">
+      <a href="#home" class="nav-link">Home</a>
+      <a href="#wizard" class="nav-link">Assistant</a>
+      <a href="#faq" class="nav-link">Tax Guide</a>
+    </nav>
+    
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle Light/Dark Theme">
+        <!-- Moon Icon -->
+        <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+        <!-- Sun Icon -->
+        <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707-.707m12.728 0l-.707.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+      </button>
+      <a href="#wizard" class="btn btn-primary btn-sm">Start Filing</a>
+    </div>
+  </header>
+
+  <!-- ── Main Application Content Views ────────────────────────────── -->
+  <main style="margin-top: calc(var(--navbar-height) + var(--space-8)); min-height: 70vh;">
+    
+    <!-- 1. LANDING VIEW (#home) -->
+    <section id="home-view" class="page-view container" style="display: none;">
+      
+      <!-- Hero Section -->
+      <div class="text-center animate-fade-in-up" style="padding: var(--space-12) 0 var(--space-8);">
+        <span class="badge badge-primary" style="margin-bottom: var(--space-4);">🇮🇳 FY 2025-26 (AY 2026-27) Ready</span>
+        <h1 style="font-size: var(--font-size-6xl); font-weight: var(--font-weight-bold); line-height: 1.1; margin-bottom: var(--space-4);">
+          File Taxes with <br>
+          <span class="text-gradient-hero">Intelligent Optimization</span>
+        </h1>
+        <p style="font-size: var(--font-size-lg); max-width: 650px; margin: 0 auto var(--space-8); color: var(--text-secondary);">
+          KarDaan guides you through a step-by-step interview, computes your liabilities under both regimes, and recommends legal ways to minimize your tax outgo.
+        </p>
+        <div class="flex justify-center gap-4">
+          <button class="btn btn-primary btn-lg" id="cta-start-btn">Start Free Assessment</button>
+          <a href="#faq" class="btn btn-secondary btn-lg">Learn Tax Laws</a>
+        </div>
+      </div>
+
+      <!-- Feature Grid -->
+      <div class="grid stagger-children" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-6); margin-top: var(--space-12);">
+        <div class="card">
+          <div style="font-size: 32px; margin-bottom: var(--space-2);">🧙‍♂️</div>
+          <h3 class="card-title">Guided Interview</h3>
+          <p class="text-secondary" style="font-size: var(--font-size-sm);">No prior tax knowledge required. We ask simple, plain-language questions to gather your details.</p>
+        </div>
+        <div class="card">
+          <div style="font-size: 32px; margin-bottom: var(--space-2);">📊</div>
+          <h3 class="card-title">Regime Comparison</h3>
+          <p class="text-secondary" style="font-size: var(--font-size-sm);">Compare Old vs New Tax Regimes instantly with the latest Union Budget 2025 revised tax slabs.</p>
+        </div>
+        <div class="card">
+          <div style="font-size: 32px; margin-bottom: var(--space-2);">💡</div>
+          <h3 class="card-title">Tax Optimization</h3>
+          <p class="text-secondary" style="font-size: var(--font-size-sm);">Discover legal tax exemptions (80C, 80D, NPS) and CTC restructuring ideas to reduce your liability.</p>
+        </div>
+        <div class="card">
+          <div style="font-size: 32px; margin-bottom: var(--space-2);">🏢</div>
+          <h3 class="card-title">Business & Personal</h3>
+          <p class="text-secondary" style="font-size: var(--font-size-sm);">Includes full calculations for Salaried Individuals, Presumptive Businesses (44AD/44ADA), and Investors.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 2. WIZARD VIEW (#wizard) -->
+    <section id="wizard-view" class="page-view container" style="display: none;">
+      <div id="wizard-container"></div>
+    </section>
+
+    <!-- 3. FAQ VIEW (#faq) -->
+    <section id="faq-view" class="page-view container" style="display: none; max-width: 800px;">
+      <h2 class="text-gradient" style="margin-bottom: var(--space-3); text-align: center;">Indian Taxation Quick Guide</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: var(--space-8);">Understand how tax laws and optimization brackets apply to you.</p>
+      
+      <div class="accordion" id="faq-accordion-container">
+        
+        <div class="accordion-item active">
+          <button class="accordion-header">What is the difference between the Old and New tax regimes?</button>
+          <div class="accordion-content" style="display: block;">
+            The <strong>New Regime</strong> (default since FY 2023-24) offers lower slab rates but removes almost all deductions (like 80C, 80D, HRA). The <strong>Old Regime</strong> has higher tax slabs but allows you to deduct tax-saving investments (up to ₹1.5L in 80C, home loan interest, HRA, etc.) to lower your net taxable income.
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header">What are the new tax slabs for FY 2025-26 under Budget 2025?</button>
+          <div class="accordion-content">
+            Under the revised New Tax Regime in Budget 2025:
+            <ul>
+              <li>• Up to ₹4,00,000: Nil</li>
+              <li>• ₹4,00,001 to ₹8,00,000: 5%</li>
+              <li>• ₹8,00,001 to ₹12,00,000: 10%</li>
+              <li>• ₹12,00,001 to ₹16,00,000: 15%</li>
+              <li>• ₹16,00,001 to ₹20,00,000: 20%</li>
+              <li>• ₹20,00,001 to ₹24,00,000: 25%</li>
+              <li>• Above ₹24,00,000: 30%</li>
+            </ul>
+            Additionally, standard deduction is increased to ₹75,000 and the Section 87A rebate limit is raised to ₹12 Lakhs.
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header">Who can file under Presumptive Taxation (Sections 44AD / 44ADA)?</button>
+          <div class="accordion-content">
+            Presumptive taxation allows businesses (turnover &lt; ₹3Cr) or specified professionals (receipts &lt; ₹75L) to declare tax on a flat presumptive rate (8%/6% for business, 50% for professionals) without maintaining account books.
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <button class="accordion-header">Is my financial data safe on this website?</button>
+          <div class="accordion-content">
+            Yes, KarDaan operates <strong>100% locally in your browser</strong>. We do not use any databases or send your salary or profile details to any backend server. You can even run this application entirely offline!
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Footer ───────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="footer-logo">
+          <div class="nav-logo-icon">कर</div>
+          <span class="text-gradient">KarDaan</span>
+        </div>
+        <p class="footer-disclaimer">
+          KarDaan is an open-source client-side tax computation advisory tool built for taxpayers in India. Slabs and rates are calculated under the Indian Income Tax Act, 1961 for FY 2025-26. Not a substitute for professional CA audit.
+        </p>
+      </div>
+      <div>
+        <h4 class="footer-title">Navigation</h4>
+        <ul class="footer-links">
+          <li><a href="#home" class="footer-link">Home</a></li>
+          <li><a href="#wizard" class="footer-link">Guided Wizard</a></li>
+          <li><a href="#faq" class="footer-link">Tax Guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="footer-title">Tax Timelines</h4>
+        <ul class="footer-links">
+          <li class="footer-link">ITR Filing Due: 31 July 2026</li>
+          <li class="footer-link">Tax Audit Due: 31 Oct 2026</li>
+          <li class="footer-link">Revised ITR Due: 31 Dec 2026</li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; 2026 KarDaan. Built with privacy in mind. Made in India.</p>
+      <p>Version 1.0.0 (Budget 2025 Updated)</p>
+    </div>
+  </footer>
+
+  <!-- ── JavaScript Scripts Load Order ────────────────────────────── -->
+  <!-- 1. Configuration & Engine Core -->
+  <script src="js/tax-data.js"></script>
+  <script src="js/hra-calculator.js"></script>
+  <script src="js/business-tax.js"></script>
+  <script src="js/capital-gains.js"></script>
+  <script src="js/tax-engine.js"></script>
+  
+  <!-- 2. UI Features & Utilities -->
+  <script src="js/utils.js"></script>
+  <script src="js/form-selector.js"></script>
+  <script src="js/optimizer.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/report-generator.js"></script>
+  
+  <!-- 3. Wizard & Router Navigation -->
+  <script src="js/wizard.js"></script>
+  <script src="js/router.js"></script>
+  
+  <!-- 4. Application Bootstrapper -->
+  <script src="js/app.js"></script>
+  
+</body>
+</html>
