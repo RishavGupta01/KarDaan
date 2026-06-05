@@ -71,8 +71,16 @@
         });
       }
 
-      // Slabs/Deductions below are only applicable under Old Regime or if switching to Old Regime makes sense
-      var checkOldRegimeDeductions = (regime === 'old');
+      // Slabs/Deductions below are evaluated to show all possible tax-saving ideas
+      var checkOldRegimeDeductions = true;
+      var oldSlabs = TaxEngine.getOldRegimeSlabs(ageCategory);
+      var oldMarginalRate = 0;
+      var oldTaxableIncome = taxResult.oldRegime.taxableSlabIncome;
+      for (var j = 0; j < oldSlabs.length; j++) {
+        if (oldTaxableIncome > oldSlabs[j].min) {
+          oldMarginalRate = oldSlabs[j].rate;
+        }
+      }
 
       if (checkOldRegimeDeductions) {
         var currentDeductions = userData.deductions || {};
@@ -84,7 +92,7 @@
         var limit80C = TD.deductions['80C'].limit; // 150000
         if (claimed80C < limit80C) {
           var remaining80C = limit80C - claimed80C;
-          var savings80C = remaining80C * marginalRate;
+          var savings80C = remaining80C * oldMarginalRate;
           suggestions.push({
             id: 'opt_80c_investment',
             category: 'investment',
@@ -108,7 +116,7 @@
         var limitNPS = TD.deductions['80CCD1B'].limit; // 50000
         if (claimedNPS < limitNPS) {
           var remainingNPS = limitNPS - claimedNPS;
-          var savingsNPS = remainingNPS * marginalRate;
+          var savingsNPS = remainingNPS * oldMarginalRate;
           suggestions.push({
             id: 'opt_nps_additional',
             category: 'investment',
@@ -132,7 +140,7 @@
         var selfLimit = ageCategory !== 'below60' ? TD.deductions['80D'].selfSeniorLimit : TD.deductions['80D'].selfLimit;
         if (claimed80D_self < selfLimit) {
           var remaining80D = selfLimit - claimed80D_self;
-          var savings80D = remaining80D * marginalRate;
+          var savings80D = remaining80D * oldMarginalRate;
           suggestions.push({
             id: 'opt_80d_self',
             category: 'insurance',
@@ -156,7 +164,7 @@
         var parentsLimit = currentDeductions.parentsSenior ? TD.deductions['80D'].parentsSeniorLimit : TD.deductions['80D'].parentsLimit;
         if (claimed80D_parents < parentsLimit) {
           var remainingParents = parentsLimit - claimed80D_parents;
-          var savingsParents = remainingParents * marginalRate;
+          var savingsParents = remainingParents * oldMarginalRate;
           suggestions.push({
             id: 'opt_80d_parents',
             category: 'insurance',
@@ -191,7 +199,7 @@
             currentUtilized: claimedTTB,
             maxLimit: 50000,
             remainingCapacity: remainingTTB,
-            potentialSavings: remainingTTB * marginalRate,
+            potentialSavings: remainingTTB * oldMarginalRate,
             priority: 'low',
             risk: 'zero',
             deadline: '31 July 2026',
@@ -209,7 +217,7 @@
             currentUtilized: claimedTTA,
             maxLimit: 10000,
             remainingCapacity: remainingTTA,
-            potentialSavings: remainingTTA * marginalRate,
+            potentialSavings: remainingTTA * oldMarginalRate,
             priority: 'low',
             risk: 'zero',
             deadline: '31 July 2026',
@@ -231,7 +239,7 @@
             currentUtilized: 0,
             maxLimit: Number(userData.income.salary.hra || 0),
             remainingCapacity: Number(userData.income.salary.hra || 0),
-            potentialSavings: Number(userData.income.salary.hra || 0) * marginalRate, // Approximate
+            potentialSavings: Number(userData.income.salary.hra || 0) * oldMarginalRate, // Approximate
             priority: 'high',
             risk: 'zero',
             deadline: '31 January 2026 (Employer submission) or 31 July 2026 (ITR filing)',

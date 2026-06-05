@@ -120,47 +120,394 @@
     </section>
 
     <!-- 3. FAQ VIEW (#faq) -->
-    <section id="faq-view" class="page-view container" style="display: none; max-width: 800px;">
-      <h2 class="text-gradient" style="margin-bottom: var(--space-3); text-align: center;">Indian Taxation Quick Guide</h2>
-      <p style="text-align: center; color: var(--text-secondary); margin-bottom: var(--space-8);">Understand how tax laws and optimization brackets apply to you.</p>
+    <section id="faq-view" class="page-view container" style="display: none; max-width: 900px;">
+      <h2 class="text-gradient" style="margin-bottom: var(--space-3); text-align: center;">Comprehensive Indian Taxation Guide</h2>
+      <p style="text-align: center; color: var(--text-secondary); margin-bottom: var(--space-8);">An educational breakdown of tax brackets, deductions, presumptive schemes, capital gains, and step-by-step filing workflows.</p>
       
       <div class="accordion" id="faq-accordion-container">
         
+        <!-- Section 1: Core Concepts & Key Terminologies -->
         <div class="accordion-item active">
-          <button class="accordion-header">What is the difference between the Old and New tax regimes?</button>
+          <button class="accordion-header">1. Core Concepts: Heads of Income, Tax Years (FY vs AY) & Residency Status</button>
           <div class="accordion-content" style="display: block;">
-            The <strong>New Regime</strong> (default since FY 2023-24) offers lower slab rates but removes almost all deductions (like 80C, 80D, HRA). The <strong>Old Regime</strong> has higher tax slabs but allows you to deduct tax-saving investments (up to ₹1.5L in 80C, home loan interest, HRA, etc.) to lower your net taxable income.
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <button class="accordion-header">What are the new tax slabs for FY 2025-26 under Budget 2025?</button>
-          <div class="accordion-content">
-            Under the revised New Tax Regime in Budget 2025:
-            <ul>
-              <li>• Up to ₹4,00,000: Nil</li>
-              <li>• ₹4,00,001 to ₹8,00,000: 5%</li>
-              <li>• ₹8,00,001 to ₹12,00,000: 10%</li>
-              <li>• ₹12,00,001 to ₹16,00,000: 15%</li>
-              <li>• ₹16,00,001 to ₹20,00,000: 20%</li>
-              <li>• ₹20,00,001 to ₹24,00,000: 25%</li>
-              <li>• Above ₹24,00,000: 30%</li>
+            <p>To navigate income tax in India, you must understand the basic statutory framework defined under the <strong>Income Tax Act, 1961</strong>. Taxes are not computed arbitrarily; they are grouped into specific categories and timelines.</p>
+            
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">A. The Five Heads of Income (Section 14)</h4>
+            <p>The Income Tax Act classifies every source of earning into one of five distinct categories. Each head has its own set of rules, exemptions, and deductions:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>1. Income from Salary:</strong> Any remuneration received under an employer-employee relationship. This includes basic salary, dearness allowance (DA), house rent allowance (HRA), bonuses, commissions, perquisites (non-cash benefits like company cars or free housing), and retirement benefits (pension, gratuity).</li>
+              <li style="margin-bottom: 6px;"><strong>2. Income from House Property:</strong> Income earned from leasing out real estate. It also computes the "deemed" rental income on vacant properties if you own multiple houses. Conversely, interest paid on home loans for self-occupied properties is represented as a loss under this head.</li>
+              <li style="margin-bottom: 6px;"><strong>3. Profits and Gains of Business or Profession (PGBP):</strong> Earnings from proprietary businesses, partnership firms, professional services (CAs, doctors, tech consultants), and freelancing. Tax is paid on net profit (gross revenues minus business expenses like rent, office utilities, depreciation, and employee pay).</li>
+              <li style="margin-bottom: 6px;"><strong>4. Capital Gains:</strong> Profits derived from selling capital assets. It is categorized into Short-Term Capital Gains (STCG) and Long-Term Capital Gains (LTCG) depending on how long you held the asset before disposal.</li>
+              <li style="margin-bottom: 6px;"><strong>5. Income from Other Sources (IFOS):</strong> The residual head for any taxable income that doesn't fit the other four heads. Examples include bank savings interest, fixed deposit (FD) interest, dividends, gifts exceeding ₹50,000 from non-relatives, family pension, and winnings from lotteries, card games, or online fantasy sports.</li>
             </ul>
-            Additionally, standard deduction is increased to ₹75,000 and the Section 87A rebate limit is raised to ₹12 Lakhs.
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">B. Financial Year (FY) vs. Assessment Year (AY)</h4>
+            <p>A very common area of confusion for taxpayers is the distinction between FY and AY:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>Financial Year (FY):</strong> The period starting April 1 and ending March 31 of the next calendar year in which you actually earn your income. For example, income earned between <strong>April 1, 2025 and March 31, 2026</strong> constitutes <strong>FY 2025-26</strong>.</li>
+              <li style="margin-bottom: 6px;"><strong>Assessment Year (AY):</strong> The 12-month period immediately following the Financial Year. It is the period in which your earned income is assessed, calculated, and filed. For FY 2025-26, the assessment year is <strong>AY 2026-27</strong> (the filing window for which opens around May 2026 and generally closes on July 31, 2026).</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">C. Tax Residency Status (Section 6)</h4>
+            <p>Your liability to pay tax in India is governed by your residential status, not your citizenship. Status is determined for each FY based on the number of days you stay in India:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>Resident and Ordinarily Resident (ROR):</strong> You qualify if you stay in India for 182 days or more in the FY, OR stay for 60 days (120 days for Indian citizens/PIOs visiting India with income > ₹15L) and have been in India for 365 days or more during the preceding 4 years. <em>RORs are taxed on global income (both Indian and foreign earnings).</em></li>
+              <li style="margin-bottom: 6px;"><strong>Resident but Not Ordinarily Resident (RNOR):</strong> You qualify if you meet the residency test but have been an NRI in 9 out of 10 preceding years, or stayed in India for 729 days or less in the preceding 7 years. <em>RNORs are only taxed on Indian-sourced income or business controlled from India.</em></li>
+              <li style="margin-bottom: 6px;"><strong>Non-Resident Indian (NRI):</strong> If you do not meet the basic residency conditions. <em>NRIs are taxed strictly on income earned, received, or accrued in India (e.g., Indian salary, rental income, FD interest, capital gains).</em></li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">D. Exempt Income vs. Deductions</h4>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>Exempt Income (Section 10):</strong> Income that is completely excluded from tax calculations and does not form part of your Gross Total Income. Examples include agricultural income (Section 10(1)), PPF maturity amounts, and tax-free gratuity up to ₹20 Lakhs.</li>
+              <li style="margin-bottom: 6px;"><strong>Deductions (Chapter VI-A):</strong> Reductions that you subtract from your Gross Total Income (after aggregating the five heads) to arrive at your Net Taxable Income. Deductions are active tax-saving investments/expenses (like Section 80C, 80D, etc.) which are only available under the Old Tax Regime.</li>
+            </ul>
           </div>
         </div>
 
+        <!-- Section 2: Comparing Old vs New Regimes -->
         <div class="accordion-item">
-          <button class="accordion-header">Who can file under Presumptive Taxation (Sections 44AD / 44ADA)?</button>
+          <button class="accordion-header">2. Old vs. New Regime: Slabs, Structural Differences & Switching Rules (Budget 2025)</button>
           <div class="accordion-content">
-            Presumptive taxation allows businesses (turnover &lt; ₹3Cr) or specified professionals (receipts &lt; ₹75L) to declare tax on a flat presumptive rate (8%/6% for business, 50% for professionals) without maintaining account books.
+            <p>Indian taxpayers can choose which taxation system they want to use. The choice is a trade-off between lower flat tax rates without deductions, or higher tax rates with major deductions.</p>
+            
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">A. The New Tax Regime (Section 115BAC)</h4>
+            <p>Introduced as the default regime, the New Tax Regime was heavily modified in the Union Budget 2025. It offers wider brackets and lower tax rates, but disallows almost all deductions (such as HRA, 80C, 80D, 24(b) interest for self-occupied property, LTA, and professional tax). It allows only standard deduction and employer NPS contributions.</p>
+            <div class="table-container" style="margin-top: 10px; margin-bottom: 15px;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Tax Slabs (New Regime - FY 2025-26 / AY 2026-27)</th>
+                    <th class="text-right">Tax Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Up to ₹4,00,000</td><td class="text-right">Nil (0%)</td></tr>
+                  <tr><td>₹4,00,001 to ₹8,00,000</td><td class="text-right">5%</td></tr>
+                  <tr><td>₹8,00,001 to ₹12,00,000</td><td class="text-right">10%</td></tr>
+                  <tr><td>₹12,00,001 to ₹16,00,000</td><td class="text-right">15%</td></tr>
+                  <tr><td>₹16,00,001 to ₹20,00,000</td><td class="text-right">20%</td></tr>
+                  <tr><td>₹20,00,001 to ₹24,00,000</td><td class="text-right">25%</td></tr>
+                  <tr><td>Above ₹24,00,000</td><td class="text-right">30%</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">B. The Old Tax Regime</h4>
+            <p>The traditional regime offers higher tax rates but allows you to reduce your taxable income using eligible tax exemptions and savings deductions (80C, 80D, HRA, etc.). Basic exemptions vary by age Category:</p>
+            
+            <div class="table-container" style="margin-top: 10px; margin-bottom: 15px;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Tax Slabs (Old Regime - For Individuals &lt; 60 Years)</th>
+                    <th class="text-right">Tax Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Up to ₹2,50,000</td><td class="text-right">Nil (0%)</td></tr>
+                  <tr><td>₹2,50,001 to ₹5,00,000</td><td class="text-right">5%</td></tr>
+                  <tr><td>₹5,00,001 to ₹10,00,000</td><td class="text-right">20%</td></tr>
+                  <tr><td>Above ₹10,00,000</td><td class="text-right">30%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc; font-size: var(--font-size-sm); color: var(--text-secondary);">
+              <li><strong>Senior Citizens (Aged 60 to 79):</strong> Nil rate up to ₹3,00,000; 5% from ₹3,00,001 to ₹5,00,000; remaining slabs identical.</li>
+              <li><strong>Super Senior Citizens (Aged 80+):</strong> Nil rate up to ₹5,00,000; 20% from ₹5,00,001 to ₹10,00,000; remaining slabs identical.</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">C. Illustrative Comparison (Which is better?)</h4>
+            <p>To demonstrate the impact of regime selection, consider a taxpayer (under 60 years) with a Gross Salary of <strong>₹15,00,000</strong>:</p>
+            <div class="table-container" style="margin-top: 10px; margin-bottom: 15px;">
+              <table class="table" style="font-size: var(--font-size-sm);">
+                <thead>
+                  <tr>
+                    <th>Calculation Block</th>
+                    <th class="text-right">Old Regime (Max Deductions)</th>
+                    <th class="text-right">New Regime (Default)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Gross Income</td><td class="text-right">₹15,00,000</td><td class="text-right">₹15,00,000</td></tr>
+                  <tr><td>Standard Deduction</td><td class="text-right">-₹50,000</td><td class="text-right">-₹75,000</td></tr>
+                  <tr><td>Chapter VI-A Claims (80C, 80D, etc.)</td><td class="text-right">-₹2,00,000</td><td class="text-right">₹0</td></tr>
+                  <tr><td>HRA Exemption Claimed</td><td class="text-right">-₹1,00,000</td><td class="text-right">₹0</td></tr>
+                  <tr><td>Interest on Home Loan (24b)</td><td class="text-right">-₹1,50,000</td><td class="text-right">₹0</td></tr>
+                  <tr><td><strong>Net Taxable Income</strong></td><td class="text-right"><strong>₹10,00,000</strong></td><td class="text-right"><strong>₹14,25,000</strong></td></tr>
+                  <tr style="background: rgba(var(--color-primary-rgb), 0.1);">
+                    <td><strong>Computed Tax (Incl 4% Cess)</strong></td>
+                    <td class="text-right"><strong>₹1,17,000</strong></td>
+                    <td class="text-right"><strong>₹97,500</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>In this scenario, even with <strong>₹5,00,000</strong> in combined deductions and exemptions, the New Regime is still cheaper by <strong>₹19,500</strong> due to the lower tax slabs!</p>
+            
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">D. The Break-Even Rule & Switching Regimes</h4>
+            <p><strong>Rule of Thumb:</strong> For a salaried taxpayer, if your total eligible deductions/exemptions exceed <strong>₹3,75,000</strong>, the Old Regime generally yields savings. Below this threshold, the New Regime is almost always better.</p>
+            <p><strong>How and When to Switch:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>Salaried Individuals (No Business Income):</strong> Can choose between Old and New regimes every single year when filing their tax return under Section 139(1). No advance registration required.</li>
+              <li style="margin-bottom: 6px;"><strong>Individuals with Business/Professional Income (PGBP):</strong> Can switch from New to Old regime only <strong>once in their lifetime</strong>. To switch, they must submit <strong>Form 10-IEA</strong> on or before the due date for filing the return. If they switch back to the New Regime later, they can never choose the Old Regime again.</li>
+            </ul>
           </div>
         </div>
 
+        <!-- Section 3: Standard Deduction & Section 87A Rebates -->
         <div class="accordion-item">
-          <button class="accordion-header">Is my financial data safe on this website?</button>
+          <button class="accordion-header">3. Deep-Dive: Standard Deduction, Section 87A Rebate & Marginal Relief</button>
           <div class="accordion-content">
-            Yes, KarDaan operates <strong>100% locally in your browser</strong>. We do not use any databases or send your salary or profile details to any backend server. You can even run this application entirely offline!
+            <h4 style="color: var(--color-primary-300);">A. Standard Deduction (Section 16(ia))</h4>
+            <p>Standard deduction is a flat deduction allowed from your gross salary or pension income to cover expenses related to employment. You do not need to produce bills, receipts, or proofs of spending to claim this deduction.</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>New Regime standard deduction:</strong> Increased to <strong>₹75,000</strong> starting FY 2025-26.</li>
+              <li style="margin-bottom: 6px;"><strong>Old Regime standard deduction:</strong> Maintained at <strong>₹50,000</strong>.</li>
+              <li style="margin-bottom: 6px;"><em>Note: Self-employed freelancers, consultants, and business owners are NOT eligible for Standard Deduction.</em></li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">B. Section 87A Tax Rebate (The "Zero-Tax" Threshold)</h4>
+            <p>Section 87A is a relief mechanism designed to ensure low and middle-income earners pay zero income tax. It subtracts tax liability directly before cess is applied:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>New Regime Rebate Limit:</strong> Available to residents whose total taxable income does not exceed <strong>₹12,00,000</strong>. The maximum rebate is <strong>₹60,000</strong>. Combined with standard deduction, any resident earning a gross salary of up to <strong>₹12,75,000</strong> pays zero income tax!</li>
+              <li style="margin-bottom: 6px;"><strong>Old Regime Rebate Limit:</strong> Available to residents whose total taxable income does not exceed <strong>₹5,00,000</strong>. The maximum rebate is <strong>₹12,500</strong>.</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">C. What is Section 87A Marginal Relief? (Avoiding the Cliff Edge)</h4>
+            <p>Under a strict reading of the law, earning just ₹1 above the rebate limit would trigger a huge tax liability. For example, in the New Regime, an income of ₹12,00,000 would pay ₹0 tax, but an income of ₹12,01,000 would pay ₹60,150 + Cess. To prevent this, <strong>Marginal Relief</strong> was introduced.</p>
+            <p><strong>The Law:</strong> If your net taxable income is slightly above ₹12,00,000, your tax liability cannot exceed the amount by which your income exceeds ₹12,00,000.</p>
+            <p><strong>Example Calculation (Taxable Income: ₹12,10,000):</strong></p>
+            <ol style="margin-left: 20px; margin-top: 8px; list-style-type: decimal;">
+              <li style="margin-bottom: 4px;">Slab Tax on ₹12,10,000 = ₹60,000 (up to 12L) + 15% of ₹10,000 = <strong>₹61,500</strong>.</li>
+              <li style="margin-bottom: 4px;">Excess Income over ₹12,00,000 = ₹12,10,000 - ₹12,00,000 = <strong>₹10,000</strong>.</li>
+              <li style="margin-bottom: 4px;">Since computed tax (₹61,500) exceeds excess income (₹10,000), marginal relief is granted!</li>
+              <li style="margin-bottom: 4px;">Relief Granted = Slab Tax - Excess Income = ₹61,500 - ₹10,000 = <strong>₹51,500</strong>.</li>
+              <li style="margin-bottom: 4px;">Net Tax Payable = Slab Tax - Relief = ₹61,500 - ₹51,500 = <strong>₹10,000</strong> (plus 4% cess = ₹10,400).</li>
+            </ol>
+            <p>KarDaan automatically computes this marginal relief to ensure your taxes are optimized.</p>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">D. The Capital Gains Exclusion under Section 87A</h4>
+            <p style="border: 1px dashed var(--color-warning-500); padding: 10px; border-radius: var(--radius-lg); background: rgba(245, 158, 11, 0.05); font-size: var(--font-size-sm);">
+              <strong>Important Legal Caveat:</strong> In the New Regime, while the Section 87A rebate is allowed against slab tax and Short-Term Capital Gains under Section 111A (flat 20%), it is **statutorily barred** from offsetting Long-Term Capital Gains on listed equities under Section 112A. If your total income is ₹8,00,000 (below the 12L threshold) but includes ₹50,000 of Section 112A LTCG, you must pay tax on that LTCG!
+            </p>
+          </div>
+        </div>
+
+        <!-- Section 4: Detailed Breakdown of Deductions -->
+        <div class="accordion-item">
+          <button class="accordion-header">4. Tax-Saving Instruments: Section 80C, 80D, NPS, HRA & Housing Loans</button>
+          <div class="accordion-content">
+            <p>If you choose the Old Tax Regime, these deductions are your primary tools to legally reduce your taxable income. Here is how each section works:</p>
+            
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">A. Section 80C (Maximum Limit: ₹1,50,000)</h4>
+            <p>This is the most widely utilized section. It covers various investments and expenses:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>PPF (Public Provident Fund):</strong> Government-backed savings scheme. 15-year maturity, interest earned is tax-free.</li>
+              <li style="margin-bottom: 4px;"><strong>EPF (Employee Provident Fund):</strong> Employee's monthly contribution deducted from salary.</li>
+              <li style="margin-bottom: 4px;"><strong>ELSS (Equity Linked Savings Scheme):</strong> Tax-saving mutual funds. Shortest lock-in period of 3 years; potential for higher equity returns.</li>
+              <li style="margin-bottom: 4px;"><strong>Home Loan Principal Repayment:</strong> The principal component of your home loan EMI.</li>
+              <li style="margin-bottom: 4px;"><strong>Other Eligible Items:</strong> Tuition fees for up to 2 children, Life Insurance Premium, Senior Citizens Savings Scheme (SCSS), National Savings Certificate (NSC), and Sukanya Samriddhi Yojana (SSY).</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">B. Section 80D (Health Insurance Premium)</h4>
+            <p>Deduction for medical insurance premiums paid for self, family, and parents via non-cash modes:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>Self, Spouse, and Children:</strong> Up to <strong>₹25,000</strong> (increases to <strong>₹50,000</strong> if self or spouse is a senior citizen).</li>
+              <li style="margin-bottom: 4px;"><strong>Parents:</strong> Additional deduction up to <strong>₹25,000</strong> (increases to <strong>₹50,000</strong> if parents are senior citizens).</li>
+              <li style="margin-bottom: 4px;"><strong>Preventive Health Check-up:</strong> Up to <strong>₹5,000</strong> within the above limits.</li>
+              <li style="margin-bottom: 4px;"><strong>Medical Expenditure:</strong> Senior citizens (aged 60+) without health insurance can claim up to <strong>₹50,000</strong> for medical expenses.</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">C. National Pension System (NPS) Deductions</h4>
+            <p>NPS is a voluntary retirement savings program that offers dual tax benefits:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>Section 80CCD(1B) (Additional Self Contribution):</strong> Deduct up to <strong>₹50,000</strong> for personal contributions. This is over and above the ₹1.5 Lakh limit of Section 80C. (Old Regime only).</li>
+              <li style="margin-bottom: 6px;"><strong>Section 80CCD(2) (Employer Contribution):</strong> Deduction for employer contributions. Exempt up to <strong>14%</strong> of Basic + DA in the New Regime, and <strong>10%</strong> in the Old Regime. <em>(Highly effective for salary restructuring).</em></li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">D. House Rent Allowance (HRA) Exemption (Section 10(13A))</h4>
+            <p>If you receive HRA from your employer and pay rent, a portion of the HRA is exempt from tax. The exempt amount is the <strong>minimum</strong> of these three calculations:</p>
+            <ol style="margin-left: 20px; margin-top: 8px; list-style-type: decimal;">
+              <li style="margin-bottom: 4px;">Actual HRA received from your employer.</li>
+              <li style="margin-bottom: 4px;">Rent paid minus 10% of your basic salary (+ DA).</li>
+              <li style="margin-bottom: 4px;">50% of basic salary (if renting in Metro cities: Delhi, Mumbai, Kolkata, Chennai) or 40% (non-metro).</li>
+            </ol>
+            <p><strong>Mathematical Example:</strong> Basic Salary = ₹6,00,000; HRA Received = ₹2,40,000; Rent Paid = ₹1,80,000 in Mumbai (Metro).</p>
+            <ul style="margin-left: 20px; margin-top: 6px; list-style-type: circle; font-size: var(--font-size-sm); color: var(--text-secondary);">
+              <li>Condition 1: ₹2,40,000</li>
+              <li>Condition 2: Rent Paid (₹1,80,000) - 10% of Basic (₹60,000) = ₹1,20,000</li>
+              <li>Condition 3: 50% of Basic = ₹3,00,000</li>
+              <li><strong>Exempt Amount:</strong> Minimum of above = <strong>₹1,20,000</strong>. (The remaining ₹1,20,000 HRA is taxable).</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">E. Home Loan Interest (Section 24(b)) & Section 80GG</h4>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>Section 24(b) (Home Loan Interest):</strong> Deduct interest paid on home loans up to <strong>₹2,00,000</strong> for self-occupied properties (Old Regime only). For let-out properties, there is no limit on the interest deduction under both regimes.</li>
+              <li style="margin-bottom: 6px;"><strong>Section 80GG (Rent Paid with no HRA):</strong> If you do not receive HRA (e.g. freelancers or employees without HRA), you can deduct rent paid. The deduction is capped at the minimum of: ₹5,000/month, 25% of total income, or rent paid minus 10% of total income.</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">F. Other Key Deductions</h4>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc; font-size: var(--font-size-sm);">
+              <li><strong>Section 80E:</strong> Deduct 100% of interest paid on higher education loans for self, spouse, or children. No upper cap. Claimable for up to 8 years.</li>
+              <li><strong>Section 80TTA:</strong> Deduct up to ₹10,000 in savings bank interest for individuals under 60.</li>
+              <li><strong>Section 80TTB:</strong> Deduct up to ₹50,000 in interest income (both savings and FD interest) for senior citizens.</li>
+              <li><strong>Section 80G:</strong> Deduct donations made to social, charitable, or government relief funds (50% or 100% depending on the fund).</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Section 5: Presumptive Taxation Schemes -->
+        <div class="accordion-item">
+          <button class="accordion-header">5. Business & Freelance Taxation: Presumptive Schemes (44AD, 44ADA & 44AE)</button>
+          <div class="accordion-content">
+            <p>To reduce compliance burdens on small business owners, freelancers, and professionals, the government introduced the **Presumptive Taxation Scheme**. Under these schemes, taxpayers are **exempt** from maintaining detailed accounting books (Section 44AA) or conducting tax audits (Section 44AB).</p>
+            
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">A. Section 44AD (Small Businesses)</h4>
+            <p>Applies to individuals, HUFs, and partnership firms engaged in retail, trading, manufacturing, or wholesale businesses:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>Turnover Cap:</strong> Gross turnover must not exceed <strong>₹2 Crore</strong>. This threshold is extended to <strong>₹3 Crore</strong> if cash receipts represent 5% or less of total turnover.</li>
+              <li style="margin-bottom: 4px;"><strong>Presumptive Profit Rates:</strong> Profits are presumed to be <strong>8%</strong> of turnover for cash transactions, and <strong>6%</strong> of turnover for digital receipts (UPI, net banking, cards).</li>
+              <li style="margin-bottom: 6px;"><strong>The 5-Year Lock-in Rule:</strong> If you opt for Section 44AD and subsequently opt out (declare actual profits lower than the presumptive rates) in any of the next 5 years, you lose the right to claim presumptive tax for the subsequent 5 financial years!</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">B. Section 44ADA (Professionals & Freelancers)</h4>
+            <p>Applies to technical consultants, software developers, writers, doctors, lawyers, CAs, engineers, and designers:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>Receipts Cap:</strong> Gross professional receipts must not exceed <strong>₹50 Lakhs</strong>. This is extended to <strong>₹75 Lakhs</strong> if cash receipts represent 5% or less of total receipts.</li>
+              <li style="margin-bottom: 6px;"><strong>Presumptive Profit Rate:</strong> A flat <strong>50%</strong> of gross receipts is treated as taxable business profit. The remaining 50% is presumed to cover all operational expenses (depreciation, office rent, internet, equipment).</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">C. Section 44AE (Goods Carriage Transporters)</h4>
+            <p>Applies to taxpayers operating transport vehicles. The owner must not own more than 10 goods carriages at any point during the year:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>Heavy Goods Vehicles (&gt; 12,000 kg):</strong> Presumptive profit is calculated at <strong>₹1,000 per ton</strong> of gross vehicle weight per month (or part of a month) for each vehicle.</li>
+              <li style="margin-bottom: 4px;"><strong>Light Goods Vehicles (&lt; 12,000 kg):</strong> Presumptive profit is calculated at <strong>₹7,500 per month</strong> (or part of a month) for each vehicle.</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">D. Repercussions of Opting Out</h4>
+            <p style="border: 1px dashed var(--color-warning-500); padding: 10px; border-radius: var(--radius-lg); background: rgba(245, 158, 11, 0.05); font-size: var(--font-size-sm); margin-bottom: 12px;">
+              <strong>Important Compliance:</strong> If you elect to declare profits *below* the presumptive limits (e.g. declaring a 30% profit margin as a developer under 44ADA), you **must** maintain detailed books of accounts under Section 44AA and have your accounts audited by a Chartered Accountant under Section 44AB, regardless of turnover!
+            </p>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">E. Advance Tax for Presumptive Filers</h4>
+            <p>Unlike regular taxpayers who must pay advance tax in four quarterly installments, presumptive taxpayers (under 44AD/44ADA) are allowed to pay their entire advance tax liability in a <strong>single installment on or before March 15</strong> of the financial year.</p>
+          </div>
+        </div>
+
+        <!-- Section 6: Capital Gains -->
+        <div class="accordion-item">
+          <button class="accordion-header">6. Capital Gains Tax: Holding Periods, Tax Rates & Property Indexation</button>
+          <div class="accordion-content">
+            <p>Earning profit on the sale of investments or physical assets triggers Capital Gains tax. The calculation depends on the asset type and the length of time you held the asset before selling.</p>
+            
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">A. Holding Period Classifications</h4>
+            <div class="table-container" style="margin-top: 10px; margin-bottom: 15px;">
+              <table class="table" style="font-size: var(--font-size-sm);">
+                <thead>
+                  <tr>
+                    <th>Asset Category</th>
+                    <th>Short-Term Holding Period</th>
+                    <th>Long-Term Holding Period</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Listed Equities, Equity MFs, Units of InvITs/REITs</td><td>Less than 12 months</td><td>12 months or more</td></tr>
+                  <tr><td>Real Estate (Land/Property), Gold, Unlisted Shares</td><td>Less than 24 months</td><td>24 months or more</td></tr>
+                  <tr><td>Debt Mutual Funds, Market-Linked Debentures (MLDs)</td><td colspan="2" class="text-center">Always taxed at slab rates (No Long-Term benefit)</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">B. Tax Rates for Capital Gains (FY 2025-26)</h4>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 6px;"><strong>Listed Equities & Equity Mutual Funds (Section 111A / 112A):</strong>
+                <ul style="margin-left: 20px; list-style-type: circle; margin-top: 4px;">
+                  <li><strong>STCG (Section 111A):</strong> Flat <strong>20%</strong>.</li>
+                  <li><strong>LTCG (Section 112A):</strong> Flat <strong>12.5%</strong>. <em>(The first **₹1,25,000** of cumulative listed equity gains in a financial year is completely tax-exempt).</em></li>
+                </ul>
+              </li>
+              <li style="margin-bottom: 6px;"><strong>Real Estate (Property) & Gold:</strong>
+                <ul style="margin-left: 20px; list-style-type: circle; margin-top: 4px;">
+                  <li><strong>STCG:</strong> Taxed at your normal progressive slab rates (added to overall income).</li>
+                  <li><strong>LTCG:</strong> Flat <strong>12.5%</strong> without indexation benefits.</li>
+                </ul>
+              </li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">C. Property Grandfathering Option (Budget 2024 Amendments)</h4>
+            <p>For real estate properties acquired before <strong>July 23, 2024</strong>, the government introduced a dual-option mechanism. Taxpayers can compute and pay tax under the lower of:</p>
+            <ol style="margin-left: 20px; margin-top: 8px; list-style-type: decimal;">
+              <li>Flat <strong>12.5%</strong> tax on the capital gain computed <strong>without indexation</strong>.</li>
+              <li>Traditional <strong>20%</strong> tax on the capital gain computed <strong>with indexation</strong>.</li>
+            </ol>
+            <p>KarDaan automatically computes both scenarios for historical properties to recommend the optimal choice.</p>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">D. What is Indexation?</h4>
+            <p>Indexation adjusts the purchase cost of an asset to account for inflation over the holding period, reducing the taxable capital gain. The government releases a Cost Inflation Index (CII) each year:</p>
+            <p style="text-align: center; background: var(--bg-elevated); padding: 8px; border-radius: var(--radius-md); font-family: monospace; font-size: var(--font-size-xs);">
+              Indexed Acquisition Cost = Actual Cost * (CII of Sale Year / CII of Purchase Year)
+            </p>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">E. Capital Gains Exemptions (Section 54, 54F & 54EC)</h4>
+            <p>You can legally avoid paying tax on Long-Term Capital Gains by reinvesting the profits:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>Section 54:</strong> Exempts gains from selling a residential house if you purchase another residential property within 2 years (or construct one within 3 years).</li>
+              <li style="margin-bottom: 4px;"><strong>Section 54F:</strong> Exempts gains from selling any non-residential asset (like gold or land) if you invest the net sale proceeds in a residential house.</li>
+              <li style="margin-bottom: 4px;"><strong>Section 54EC:</strong> Exempts gains if you invest up to ₹50 Lakhs in specialized capital gains bonds (issued by NHAI, REC, or PFC) within 6 months of the sale. Bonds have a 5-year lock-in.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Section 7: Step-by-Step Filing Workflow -->
+        <div class="accordion-item">
+          <button class="accordion-header">7. E-Filing Procedure: Aggregation, Forms, Deadlines & e-Verification</button>
+          <div class="accordion-content">
+            <p>Filing your tax return is a structured process. Here is the exact step-by-step roadmap to complete your filing on the official Income Tax portal (incometax.gov.in):</p>
+            
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">Step 1: Document Checklist</h4>
+            <p>Compile all relevant records before starting:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>Form 16:</strong> Salary certificate issued by your employer detailing gross salary, exempt allowances, and TDS.</li>
+              <li style="margin-bottom: 4px;"><strong>Form 16A/16B/16C:</strong> TDS certificates issued by banks (for FD interest), tenants (for rent TDS), or property buyers.</li>
+              <li style="margin-bottom: 4px;"><strong>AIS (Annual Information Statement) & TIS (Taxpayer Information Summary):</strong> Consolidated statements showing all financial transactions reported under your PAN.</li>
+              <li style="margin-bottom: 4px;"><strong>Capital Gains Statements:</strong> Provided by stockbrokers and mutual fund houses.</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">Step 2: Reconciling AIS vs. Form 26AS</h4>
+            <p>Log in to your e-filing portal account. Compare the entries in your **Form 26AS** (actual tax deducted) and the **AIS** (reported high-value transactions like mutual fund purchases, foreign remittances, or property sales). If there are discrepancies or incorrect reporting in the AIS, you must submit feedback on the portal immediately to prevent tax mismatch notices.</p>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">Step 3: Selecting the Correct ITR Form</h4>
+            <p>Filing using the wrong form renders your return defective. KarDaan selects the correct form based on your profile:</p>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>ITR-1 (Sahaj):</strong> For resident individuals with salary income, 1 house property, and other sources (interest etc.) where total income does not exceed ₹50 Lakhs.</li>
+              <li style="margin-bottom: 4px;"><strong>ITR-2:</strong> For individuals with salary, capital gains, foreign assets, or multiple properties, but no business/professional income.</li>
+              <li style="margin-bottom: 4px;"><strong>ITR-4 (Sugam):</strong> For small businesses and professionals electing presumptive taxation (44AD/44ADA) with income up to ₹50 Lakhs.</li>
+              <li style="margin-bottom: 4px;"><strong>ITR-3:</strong> For individuals with proprietary business/professional income who maintain regular books of accounts or do not qualify for presumptive tax.</li>
+            </ul>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">Step 4: Advance Tax & Self-Assessment Tax</h4>
+            <p>If your total calculated tax liability exceeds <strong>₹10,000</strong> in an FY after deducting TDS, you must pay **Advance Tax** during the year. Senior citizens without business income are exempt.</p>
+            <p><strong>Advance Tax Due Dates:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 6px; list-style-type: circle; font-size: var(--font-size-sm); color: var(--text-secondary);">
+              <li>On or before <strong>June 15</strong>: Pay 15% of estimated tax</li>
+              <li>On or before <strong>September 15</strong>: Pay 45% of estimated tax</li>
+              <li>On or before <strong>December 15</strong>: Pay 75% of estimated tax</li>
+              <li>On or before <strong>March 15</strong>: Pay 100% of estimated tax</li>
+            </ul>
+            <p>Failure to meet these deadlines triggers interest penalties of <strong>1% per month</strong> under Section 234B (shortfall in advance tax) and Section 234C (deferment of advance tax). Any tax paid *after* March 31 but before filing is termed **Self-Assessment Tax**.</p>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300); font-weight: bold;">Step 5: E-Verification (The 30-Day Rule)</h4>
+            <p style="border: 1.5px dashed var(--color-error); padding: 12px; border-radius: var(--radius-lg); background: rgba(244, 63, 94, 0.05); font-size: var(--font-size-sm); color: var(--text-primary); margin-top: 10px; margin-bottom: 10px;">
+              <strong>Critical Warning:</strong> Simply submitting your tax return is not enough. You **must** e-verify your return within <strong>30 days</strong> of uploading it. You can e-verify instantly online using Aadhaar OTP, net banking, or Demat account. If you do not e-verify within 30 days, your return will be legally treated as invalid (never filed), and you may face late filing fees or tax notices!
+            </p>
+
+            <h4 style="margin-top: 16px; color: var(--color-primary-300);">Step 6: Belated and Revised Returns</h4>
+            <ul style="margin-left: 20px; margin-top: 8px; list-style-type: disc;">
+              <li style="margin-bottom: 4px;"><strong>Belated Return (Section 139(4)):</strong> If you miss the July 31 deadline, you can file a belated return until <strong>December 31</strong> of the Assessment Year. You must pay a late fee under Section 234F (₹5,000, or ₹1,000 if total income is ₹5 Lakhs or less).</li>
+              <li style="margin-bottom: 4px;"><strong>Revised Return (Section 139(5)):</strong> If you discover a mistake or omission in your filed return, you can submit a revised return to correct it. The last date to file a revised return is also <strong>December 31</strong> of the Assessment Year.</li>
+            </ul>
           </div>
         </div>
 

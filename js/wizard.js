@@ -183,14 +183,29 @@
         };
         footer.appendChild(printBtn);
       } else {
+        var deleteBtn = window.Utils.createElement('button', 'btn btn-danger', 'Reset Draft');
+        deleteBtn.onclick = function () {
+          if (confirm('Are you sure you want to delete your draft and reset all inputs? This cannot be undone.')) {
+            window.Utils.clearLocalStorage('kardaan_draft');
+            window.location.reload();
+          }
+        };
+        footer.appendChild(deleteBtn);
+
+        var rightActions = window.Utils.createElement('div');
+        rightActions.style.display = 'flex';
+        rightActions.style.gap = 'var(--space-3)';
+
         var backBtn = window.Utils.createElement('button', 'btn btn-secondary', '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px; margin-top: -2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>Back');
         backBtn.onclick = function () { window.TaxWizard.prevStep(); };
-        footer.appendChild(backBtn);
+        rightActions.appendChild(backBtn);
 
         var label = step.id === 'review' ? 'Calculate Tax ' : 'Continue ';
         var nextBtn = window.Utils.createElement('button', 'btn btn-primary', label);
         nextBtn.onclick = function () { window.TaxWizard.nextStep(); };
-        footer.appendChild(nextBtn);
+        rightActions.appendChild(nextBtn);
+
+        footer.appendChild(rightActions);
       }
 
       parent.appendChild(footer);
@@ -823,18 +838,20 @@
         '<h2>10. Review Details</h2>' +
         '<p class="card-subtitle">Review your reported income details before calculating.</p>' +
         '<div style="display: flex; flex-direction: column; gap: var(--space-4); margin-top: 20px;">' +
-        '  <table class="table">' +
-        '    <thead><tr><th>Category</th><th>Details</th><th>Gross Amount</th></tr></thead>' +
-        '    <tbody>' +
-        '      <tr><td><strong>Profile</strong></td><td>Name: ' + (state.profile.name || 'N/A') + ' | Age: ' + state.profile.age + '</td><td>-</td></tr>' +
-        (state.selectedIncomes.salary ? '      <tr><td><strong>Salary</strong></td><td>Gross Salary reported</td><td>' + window.Utils.formatCurrency(heads.salaryGross) + '</td></tr>' : '') +
-        (state.selectedIncomes.property ? '      <tr><td><strong>Properties</strong></td><td>Owned HP Interest/Income</td><td>' + window.Utils.formatCurrency(heads.houseProperty) + '</td></tr>' : '') +
-        (state.selectedIncomes.gains ? '      <tr><td><strong>Capital Gains</strong></td><td>STCG + LTCG portfolio net</td><td>' + window.Utils.formatCurrency(heads.stcg + heads.ltcg) + '</td></tr>' : '') +
-        (state.selectedIncomes.business ? '      <tr><td><strong>Business</strong></td><td>Presumptive or Regular</td><td>' + window.Utils.formatCurrency(heads.business) + '</td></tr>' : '') +
-        (state.selectedIncomes.other ? '      <tr><td><strong>Other Sources</strong></td><td>Savings / FDs / Dividends</td><td>' + window.Utils.formatCurrency(heads.otherSources) + '</td></tr>' : '') +
-        '      <tr><td><strong>Deductions</strong></td><td>Section claimed savings (80C, 80D, NPS etc.)</td><td>' + window.Utils.formatCurrency(totalDeds) + '</td></tr>' +
-        '    </tbody>' +
-        '  </table>' +
+        '  <div class="table-container">' +
+        '    <table class="table">' +
+        '      <thead><tr><th>Category</th><th>Details</th><th>Gross Amount</th></tr></thead>' +
+        '      <tbody>' +
+        '        <tr><td><strong>Profile</strong></td><td>Name: ' + (state.profile.name || 'N/A') + ' | Age: ' + state.profile.age + '</td><td>-</td></tr>' +
+        (state.selectedIncomes.salary ? '        <tr><td><strong>Salary</strong></td><td>Gross Salary reported</td><td>' + window.Utils.formatCurrency(heads.salaryGross) + '</td></tr>' : '') +
+        (state.selectedIncomes.property ? '        <tr><td><strong>Properties</strong></td><td>Owned HP Interest/Income</td><td>' + window.Utils.formatCurrency(heads.houseProperty) + '</td></tr>' : '') +
+        (state.selectedIncomes.gains ? '        <tr><td><strong>Capital Gains</strong></td><td>STCG + LTCG portfolio net</td><td>' + window.Utils.formatCurrency(heads.stcg + heads.ltcg) + '</td></tr>' : '') +
+        (state.selectedIncomes.business ? '        <tr><td><strong>Business</strong></td><td>Presumptive or Regular</td><td>' + window.Utils.formatCurrency(heads.business) + '</td></tr>' : '') +
+        (state.selectedIncomes.other ? '        <tr><td><strong>Other Sources</strong></td><td>Savings / FDs / Dividends</td><td>' + window.Utils.formatCurrency(heads.otherSources) + '</td></tr>' : '') +
+        '        <tr><td><strong>Deductions</strong></td><td>Section claimed savings (80C, 80D, NPS etc.)</td><td>' + window.Utils.formatCurrency(totalDeds) + '</td></tr>' +
+        '      </tbody>' +
+        '    </table>' +
+        '  </div>' +
         '</div>';
     },
 
@@ -906,7 +923,7 @@
       if (validSuggestions.length === 0) {
         optsContainer.innerHTML = '<p class="text-muted" style="font-size:13px; text-align:center; padding: 20px;">No additional optimizations found. Your tax liability is minimized.</p>';
       } else {
-        var optLimit = Math.min(3, validSuggestions.length);
+        var optLimit = validSuggestions.length;
         for (var k = 0; k < optLimit; k++) {
           var sugg = validSuggestions[k];
           var optCard = window.Utils.createElement('div', 'opt-card animate-scale-in');

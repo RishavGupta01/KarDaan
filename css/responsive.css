@@ -66,11 +66,11 @@
     display: flex !important;
   }
 
-  .navbar-actions {
+  .nav-actions {
     gap: var(--space-2);
   }
 
-  .navbar-actions .btn {
+  .nav-actions .btn {
     display: none;
   }
 
@@ -216,24 +216,30 @@
   }
 
   /* ── Wizard Stepper ──────────────────────────────────── */
-  .wizard-stepper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
+  .stepper-container {
+    justify-content: flex-start;
+    gap: var(--space-4);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
-  .wizard-stepper .step-connector {
-    width: 2px;
-    height: 24px;
-    margin: 0 0 0 19px;
+  .stepper-container::-webkit-scrollbar {
+    display: none;
   }
 
-  .wizard-stepper .step-item {
+  .stepper-container::before {
+    display: none;
+  }
+
+  .stepper-step {
     flex-direction: row;
-    gap: var(--space-3);
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0;
   }
 
-  .wizard-stepper .step-label {
+  .stepper-step .step-label {
     display: block;
   }
 
@@ -464,11 +470,11 @@
    Height-based queries (for wizard stepper)
    ============================================================ */
 @media (max-height: 700px) and (min-width: 768px) {
-  .wizard-stepper {
+  .stepper-container {
     padding: var(--space-2) 0;
   }
 
-  .step-circle {
+  .step-bubble {
     width: 32px;
     height: 32px;
     font-size: var(--font-size-xs);
@@ -508,7 +514,7 @@
   .toast-container,
   .modal-overlay,
   .btn:not(.btn-print),
-  .wizard-stepper,
+  .stepper-container,
   .wizard-nav,
   .footer,
   .spinner,

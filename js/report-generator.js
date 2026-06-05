@@ -2,7 +2,7 @@
  * @file report-generator.js
  * @description Generates printable reports and summaries for tax filings in India.
  *              Builds structured print layouts that convert clean to PDF via the browser.
- * @version 1.0.0
+ * @version 1.1.0
  * @license MIT
  */
 
@@ -13,9 +13,11 @@
     throw new Error('[ReportGenerator] window.Utils and window.FormSelector are required.');
   }
 
+  var TD = window.TaxData;
+
   window.ReportGenerator = {
     /**
-     * Generate HTML structure for printable tax report.
+     * Generate HTML structure for printable tax report (CA audit simulation).
      * @param {Object} userData
      * @param {Object} taxResult
      * @param {Array<Object>} suggestions
@@ -35,70 +37,138 @@
       // Report Container
       html += '<div class="print-report">';
       
-      // Header
+      // Document Header
       html += '  <div class="print-header">';
-      html += '    <div class="print-title-area">';
-      html += '      <h1>KarDaan Tax Computation Report</h1>';
-      html += '      <p>Financial Year: 2025-26 | Assessment Year: 2026-27</p>';
-      html += '    </div>';
-      html += '    <div class="print-meta-area">';
-      html += '      <p>Generated on: <strong>' + formattedDate + '</strong></p>';
-      html += '      <p>Filing Status: <strong>Draft</strong></p>';
-      html += '    </div>';
+      html += '    <h1>STATEMENT OF COMPUTATION OF TOTAL INCOME & TAX LIABILITY</h1>';
+      html += '    <p>Assessment Year: 2026-27 | Financial Year: 2025-26</p>';
       html += '  </div>';
 
-      html += '  <hr>';
+      // 1. Assessee Metadata (Meta Table)
+      html += '  <table class="audit-meta-table">';
+      html += '    <tr>';
+      html += '      <td class="label">Name of Assessee</td><td><strong>' + (userData.profile.name || 'N/A').toUpperCase() + '</strong></td>';
+      html += '      <td class="label">Permanent Account No (PAN)</td><td><strong>' + maskedPAN.toUpperCase() + '</strong></td>';
+      html += '    </tr>';
+      html += '    <tr>';
+      html += '      <td class="label">Assessment Year</td><td>2026-27 (FY 2025-26)</td>';
+      html += '      <td class="label">Residential Status</td><td>Resident Individual</td>';
+      html += '    </tr>';
+      html += '    <tr>';
+      html += '      <td class="label">Age / Category</td><td>' + userData.profile.age + ' Years (' + window.Utils.getAgeCategory(userData.profile.age).toUpperCase() + ')</td>';
+      html += '      <td class="label">Filing Status / Type</td><td>' + (userData.profile.filingType || 'individual').toUpperCase() + ' / DRAFT AUDIT</td>';
+      html += '    </tr>';
+      html += '    <tr>';
+      html += '      <td class="label">Recommended return form</td><td><strong>' + selectedForm.form + ' (' + selectedForm.name + ')</strong></td>';
+      html += '      <td class="label">Tax Regime Selected</td><td><strong>' + (activeRegime === 'new' ? 'NEW REGIME (SEC 115BAC)' : 'OLD REGIME') + '</strong></td>';
+      html += '    </tr>';
+      html += '  </table>';
 
-      // Profile details
+      // 2. Main computation summary
       html += '  <div class="print-section">';
-      html += '    <h2>1. Personal Profile</h2>';
-      html += '    <table class="print-table-info">';
-      html += '      <tr><td>Name:</td><td><strong>' + (userData.profile.name || 'Valued Taxpayer') + '</strong></td><td>PAN:</td><td><strong>' + maskedPAN.toUpperCase() + '</strong></td></tr>';
-      html += '      <tr><td>Age / Category:</td><td>' + userData.profile.age + ' (' + window.Utils.getAgeCategory(userData.profile.age) + ')</td><td>Residential Status:</td><td>Resident</td></tr>';
-      html += '      <tr><td>Filing Type:</td><td>' + (userData.profile.filingType || 'individual').toUpperCase() + '</td><td>Recommended Form:</td><td><strong>' + selectedForm.form + ' (' + selectedForm.name + ')</strong></td></tr>';
-      html += '    </table>';
-      html += '  </div>';
-
-      // Income details
-      html += '  <div class="print-section">';
-      html += '    <h2>2. Income Source Summary</h2>';
+      html += '    <h2>I. Particulars of Computation of Total Income</h2>';
       html += '    <table class="print-table">';
-      html += '      <thead><tr><th>Income Head</th><th class="text-right">Amount (₹)</th></tr></thead>';
+      html += '      <thead>';
+      html += '        <tr>';
+      html += '          <th>Schedule / Head of Income</th>';
+      html += '          <th class="text-right">Gross Amount (₹)</th>';
+      html += '          <th class="text-right">Deductions/Exempt (₹)</th>';
+      html += '          <th class="text-right">Net Taxable (₹)</th>';
+      html += '        </tr>';
+      html += '      </thead>';
       html += '      <tbody>';
+
+      // Salary Row
       if (heads.salaryGross > 0) {
-        html += '        <tr><td>Gross Salary Income</td><td class="text-right">' + window.Utils.formatCurrency(heads.salaryGross) + '</td></tr>';
-        html += '        <tr class="sub-row"><td>(-) Standard Deduction</td><td class="text-right">-' + window.Utils.formatCurrency(heads.salaryStdDeduction) + '</td></tr>';
+        html += '        <tr>';
+        html += '          <td><strong>Schedule S: Income from Salary</strong></td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.salaryGross) + '</td>';
+        html += '          <td class="text-right">-' + window.Utils.formatCurrency(heads.salaryStdDeduction) + '</td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.salaryNet) + '</td>';
+        html += '        </tr>';
       }
-      if (heads.houseProperty !== 0) {
-        html += '        <tr><td>Income / Loss from House Property</td><td class="text-right">' + window.Utils.formatCurrency(heads.houseProperty) + '</td></tr>';
+
+      // House Property Row
+      if (heads.houseProperty !== 0 || heads.hpSetOff !== 0) {
+        var hpLossText = heads.houseProperty < 0 ? ' (Loss)' : '';
+        html += '        <tr>';
+        html += '          <td><strong>Schedule HP: Income from House Property</strong>' + hpLossText + '</td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.houseProperty) + '</td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.hpSetOff - heads.houseProperty) + '</td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.hpSetOff) + '</td>';
+        html += '        </tr>';
       }
+
+      // Business Income Row
       if (heads.business > 0) {
-        html += '        <tr><td>Business & Professional Income</td><td class="text-right">' + window.Utils.formatCurrency(heads.business) + '</td></tr>';
+        html += '        <tr>';
+        html += '          <td><strong>Schedule BP: Profits & Gains of Business/Profession</strong></td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.business) + '</td>';
+        html += '          <td class="text-right">0</td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.business) + '</td>';
+        html += '        </tr>';
       }
+
+      // Capital Gains Row
       if (heads.stcg > 0 || heads.ltcg > 0) {
-        html += '        <tr><td>Capital Gains (Net after Set-offs)</td><td class="text-right">' + window.Utils.formatCurrency(heads.stcg + heads.ltcg) + '</td></tr>';
-        if (heads.stcg > 0) html += '        <tr class="sub-row"><td>STCG (Listed/Short-Term)</td><td class="text-right">' + window.Utils.formatCurrency(heads.stcg) + '</td></tr>';
-        if (heads.ltcg > 0) html += '        <tr class="sub-row"><td>LTCG (Listed/Long-Term)</td><td class="text-right">' + window.Utils.formatCurrency(heads.ltcg) + '</td></tr>';
+        var totalCg = heads.stcg + heads.ltcg;
+        html += '        <tr>';
+        html += '          <td><strong>Schedule CG: Capital Gains</strong></td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(totalCg) + '</td>';
+        html += '          <td class="text-right">0</td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(totalCg) + '</td>';
+        html += '        </tr>';
       }
+
+      // Other Sources Row
       if (heads.otherSources > 0) {
-        html += '        <tr><td>Income from Other Sources (Interest, Dividends)</td><td class="text-right">' + window.Utils.formatCurrency(heads.otherSources) + '</td></tr>';
+        html += '        <tr>';
+        html += '          <td><strong>Schedule OS: Income from Other Sources</strong></td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.otherSources) + '</td>';
+        html += '          <td class="text-right">0</td>';
+        html += '          <td class="text-right">' + window.Utils.formatCurrency(heads.otherSources) + '</td>';
+        html += '        </tr>';
       }
-      html += '        <tr class="total-row"><td><strong>Gross Total Income (GTI)</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.grossIncome) + '</strong></td></tr>';
+
+      // Gross Total Income
+      html += '        <tr class="total-row">';
+      html += '          <td><strong>Gross Total Income (GTI)</strong></td>';
+      html += '          <td colspan="2"></td>';
+      html += '          <td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.grossIncome) + '</strong></td>';
+      html += '        </tr>';
+
+      // Deductions under Chapter VI-A
+      var dedValue = activeData.otherDeductions;
+      html += '        <tr>';
+      html += '          <td>Less: Deductions under Chapter VI-A (Schedule VIA)</td>';
+      html += '          <td colspan="2"></td>';
+      html += '          <td class="text-right">-' + window.Utils.formatCurrency(dedValue) + '</td>';
+      html += '        </tr>';
+
+      // Net Taxable Income
+      html += '        <tr class="double-total-row">';
+      html += '          <td><strong>TOTAL TAXABLE INCOME (Rounded Off)</strong></td>';
+      html += '          <td colspan="2"></td>';
+      html += '          <td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.taxableSlabIncome) + '</strong></td>';
+      html += '        </tr>';
+
       html += '      </tbody>';
       html += '    </table>';
       html += '  </div>';
 
-      // Deductions
+      // 3. Schedule Chapter VI-A Deductions
       html += '  <div class="print-section">';
-      html += '    <h2>3. Eligible Deductions (Chapter VI-A)</h2>';
+      html += '    <h2>II. Schedule VIA: Details of Deductions Claimed</h2>';
       html += '    <table class="print-table">';
-      html += '      <thead><tr><th>Deduction Section</th><th>Description</th><th class="text-right">Claimed (₹)</th></tr></thead>';
+      html += '      <thead>';
+      html += '        <tr><th>Section</th><th>Particulars / Description</th><th class="text-right">Max Limit (₹)</th><th class="text-right">Claimed Amount (₹)</th></tr>';
+      html += '      </thead>';
       html += '      <tbody>';
+
       if (activeRegime === 'new') {
         if (activeData.otherDeductions > 0) {
-          html += '        <tr><td>Section 80CCD(2)</td><td>Employer Contribution to NPS (under New Regime)</td><td class="text-right">' + window.Utils.formatCurrency(activeData.otherDeductions) + '</td></tr>';
+          html += '        <tr><td>Section 80CCD(2)</td><td>Employer Contribution to NPS (Eligible in New Regime)</td><td class="text-right">14% of Basic</td><td class="text-right">' + window.Utils.formatCurrency(activeData.otherDeductions) + '</td></tr>';
         } else {
-          html += '        <tr><td colspan="3" class="text-center text-muted">No deductions applicable under New Tax Regime.</td></tr>';
+          html += '        <tr><td colspan="4" class="text-center text-muted">No Chapter VI-A deductions are admissible under Section 115BAC (New Tax Regime).</td></tr>';
         }
       } else {
         var breakdown = activeData.deductionsBreakdown || {};
@@ -106,75 +176,99 @@
         for (var sec in breakdown) {
           if (breakdown[sec] > 0) {
             hasDeductions = true;
-            html += '        <tr><td>' + sec + '</td><td>' + (TD.deductions[sec] ? TD.deductions[sec].description : 'Tax Savings') + '</td><td class="text-right">' + window.Utils.formatCurrency(breakdown[sec]) + '</td></tr>';
+            var limitText = TD.deductions[sec] && TD.deductions[sec].limit ? window.Utils.formatCurrency(TD.deductions[sec].limit) : 'No Limit';
+            html += '        <tr><td>' + sec + '</td><td>' + (TD.deductions[sec] ? TD.deductions[sec].description : 'Tax Savings') + '</td><td class="text-right">' + limitText + '</td><td class="text-right">' + window.Utils.formatCurrency(breakdown[sec]) + '</td></tr>';
           }
         }
         if (!hasDeductions) {
-          html += '        <tr><td colspan="3" class="text-center text-muted">No deductions claimed.</td></tr>';
+          html += '        <tr><td colspan="4" class="text-center text-muted">No Chapter VI-A deductions claimed under the Old Regime.</td></tr>';
         }
       }
-      html += '        <tr class="total-row"><td><strong>Total Deductions</strong></td><td></td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.otherDeductions) + '</strong></td></tr>';
+      html += '        <tr class="total-row"><td><strong>Total</strong></td><td colspan="2"></td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.otherDeductions) + '</strong></td></tr>';
       html += '      </tbody>';
       html += '    </table>';
       html += '  </div>';
 
-      // Tax calculation
+      // 4. Detailed Tax Computation
       html += '  <div class="print-section">';
-      html += '    <h2>4. Tax Liability Details</h2>';
+      html += '    <h2>III. Particulars of Tax Liability Computation</h2>';
       html += '    <table class="print-table">';
+      html += '      <thead>';
+      html += '        <tr><th>Description</th><th class="text-right">Rate</th><th class="text-right">Amount (₹)</th></tr>';
+      html += '      </thead>';
       html += '      <tbody>';
-      html += '        <tr><td>Net Taxable Income</td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.taxableSlabIncome) + '</strong></td></tr>';
-      html += '        <tr><td>Tax calculated at Normal Slab Rates</td><td class="text-right">' + window.Utils.formatCurrency(activeData.slabTax) + '</td></tr>';
+      html += '        <tr><td>Tax on Income at Normal Slab Rates</td><td class="text-right">Progressive</td><td class="text-right">' + window.Utils.formatCurrency(activeData.slabTax) + '</td></tr>';
+      
       if (activeData.capitalGainsTax > 0) {
-        html += '        <tr><td>Tax on Capital Gains (Special Rates)</td><td class="text-right">' + window.Utils.formatCurrency(activeData.capitalGainsTax) + '</td></tr>';
+        html += '        <tr><td>Tax on Capital Gains (Special Rates under Sec 111A/112A)</td><td class="text-right">20% / 12.5%</td><td class="text-right">' + window.Utils.formatCurrency(activeData.capitalGainsTax) + '</td></tr>';
       }
-      html += '        <tr><td>(-) Section 87A Rebate</td><td class="text-right">-' + window.Utils.formatCurrency(activeData.rebate87A) + '</td></tr>';
-      html += '        <tr><td>(+) Surcharge (if applicable)</td><td class="text-right">' + window.Utils.formatCurrency(activeData.surcharge) + '</td></tr>';
-      html += '        <tr><td>(+) Health & Education Cess (4%)</td><td class="text-right">' + window.Utils.formatCurrency(activeData.cess) + '</td></tr>';
-      html += '        <tr class="grand-total-row"><td><strong>Total Net Tax Payable</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.netTax) + '</strong></td></tr>';
+      
+      if (activeData.rebate87A > 0) {
+        html += '        <tr><td>Less: Rebate under Section 87A</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(activeData.rebate87A) + '</td></tr>';
+      }
+      
+      var taxAfterRebate = Math.max(0, activeData.slabTax + activeData.capitalGainsTax - activeData.rebate87A);
+      html += '        <tr class="total-row"><td>Tax After Rebate</td><td class="text-right">-</td><td class="text-right">' + window.Utils.formatCurrency(taxAfterRebate) + '</td></tr>';
+      
+      if (activeData.surcharge > 0) {
+        html += '        <tr><td>Add: Surcharge</td><td class="text-right">Slab-based</td><td class="text-right">' + window.Utils.formatCurrency(activeData.surcharge) + '</td></tr>';
+      }
+      
+      html += '        <tr><td>Add: Health and Education Cess</td><td class="text-right">4.0%</td><td class="text-right">' + window.Utils.formatCurrency(activeData.cess) + '</td></tr>';
+      
+      html += '        <tr class="double-total-row"><td><strong>NET TAX PAYABLE (A)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.netTax) + '</strong></td></tr>';
       
       var paid = userData.taxesPaid || {};
       var totalPaid = Number(paid.tds || 0) + Number(paid.advanceTax || 0) + Number(paid.selfAssessment || 0);
-      html += '        <tr><td>TDS & Advance Tax Paid</td><td class="text-right">-' + window.Utils.formatCurrency(totalPaid) + '</td></tr>';
-
+      
+      html += '        <tr><td>Less: Tax Deducted at Source (TDS) / TCS</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(paid.tds || 0) + '</td></tr>';
+      html += '        <tr><td>Less: Advance Tax Paid</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(paid.advanceTax || 0) + '</td></tr>';
+      html += '        <tr><td>Less: Self-Assessment Tax Paid</td><td class="text-right">-</td><td class="text-right">-' + window.Utils.formatCurrency(paid.selfAssessment || 0) + '</td></tr>';
+      html += '        <tr class="total-row"><td><strong>TOTAL TAX PAID (B)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(totalPaid) + '</strong></td></tr>';
+      
       var bal = activeData.netTax - totalPaid;
       if (bal > 0) {
-        html += '        <tr class="balance-due-row"><td><strong>Net Tax Outstanding (Payable)</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(bal) + '</strong></td></tr>';
+        html += '        <tr class="balance-due-row"><td><strong>NET TAX OUTSTANDING (PAYABLE) (A - B)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(bal) + '</strong></td></tr>';
       } else {
-        html += '        <tr class="refund-due-row"><td><strong>Estimated Tax Refund Due</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(Math.abs(bal)) + '</strong></td></tr>';
+        html += '        <tr class="refund-due-row"><td><strong>NET REFUND DUE TO ASSESSEE (B - A)</strong></td><td class="text-right">-</td><td class="text-right"><strong>' + window.Utils.formatCurrency(Math.abs(bal)) + '</strong></td></tr>';
       }
+      
       html += '      </tbody>';
       html += '    </table>';
       html += '  </div>';
 
-      // Regime comparison
+      // 5. Dual Regime Comparison Statement
       html += '  <div class="print-section">';
-      html += '    <h2>5. Regime Comparison Analysis</h2>';
+      html += '    <h2>IV. Regime Suitability & Comparison Statement</h2>';
       html += '    <table class="print-table">';
-      html += '      <thead><tr><th>Component</th><th class="text-right">Old Regime (₹)</th><th class="text-right">New Regime (₹)</th></tr></thead>';
+      html += '      <thead>';
+      html += '        <tr><th>Particulars / Head of Income</th><th class="text-right">Old Regime (₹)</th><th class="text-right">New Regime (₹)</th></tr>';
+      html += '      </thead>';
       html += '      <tbody>';
-      html += '        <tr><td>Gross Income</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.oldRegime.grossIncome) + '</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.newRegime.grossIncome) + '</td></tr>';
-      html += '        <tr><td>Standard Deduction</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.oldRegime.standardDeduction) + '</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.newRegime.standardDeduction) + '</td></tr>';
-      html += '        <tr><td>Eligible Deductions</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.oldRegime.otherDeductions) + '</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.newRegime.otherDeductions) + '</td></tr>';
-      html += '        <tr><td>Net Taxable Income</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.oldRegime.taxableSlabIncome) + '</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.newRegime.taxableSlabIncome) + '</td></tr>';
-      html += '        <tr class="total-row"><td><strong>Net Tax Payable (with Cess)</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.oldRegime.netTax) + '</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.newRegime.netTax) + '</strong></td></tr>';
-      html += '        <tr class="sub-row"><td><strong>Recommended Choice</strong></td><td colspan="2" class="text-center"><strong>' + (activeRegime === 'new' ? 'New Tax Regime (Saves ' : 'Old Tax Regime (Saves ') + window.Utils.formatCurrency(taxResult.savings) + ')</strong></td></tr>';
+      html += '        <tr><td>Gross Total Income (GTI)</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.oldRegime.grossIncome) + '</td><td class="text-right">' + window.Utils.formatCurrency(taxResult.newRegime.grossIncome) + '</td></tr>';
+      html += '        <tr><td>Less: Standard Deduction</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.oldRegime.standardDeduction) + '</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.newRegime.standardDeduction) + '</td></tr>';
+      html += '        <tr><td>Less: Chapter VI-A Deductions</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.oldRegime.otherDeductions) + '</td><td class="text-right">-' + window.Utils.formatCurrency(taxResult.newRegime.otherDeductions) + '</td></tr>';
+      html += '        <tr><td>Total Net Taxable Income</td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.oldRegime.taxableSlabIncome) + '</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.newRegime.taxableSlabIncome) + '</strong></td></tr>';
+      html += '        <tr class="double-total-row"><td><strong>NET TAX LIABILITY (Incl. Cess)</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.oldRegime.netTax) + '</strong></td><td class="text-right"><strong>' + window.Utils.formatCurrency(taxResult.newRegime.netTax) + '</strong></td></tr>';
+      html += '        <tr class="total-row"><td colspan="3" class="text-center"><strong>RECOMMENDATION: OPT FOR ' + (activeRegime === 'new' ? 'NEW REGIME' : 'OLD REGIME') + ' (SAVINGS OF ' + window.Utils.formatCurrency(taxResult.savings) + ')</strong></td></tr>';
       html += '      </tbody>';
       html += '    </table>';
       html += '  </div>';
 
-      // Optimizer ideas
+      // 6. Tax Optimizer advice
       if (suggestions.length > 0) {
         html += '  <div class="print-section page-break">';
-        html += '    <h2>6. Major Tax-Saving Suggestions (Potential Savings: ' + window.Utils.formatCurrency(window.TaxOptimizer.getTotalPotentialSavings(suggestions)) + ')</h2>';
+        html += '    <h2>V. Schedule of Recommended Tax Optimization Strategies</h2>';
         html += '    <table class="print-table">';
-        html += '      <thead><tr><th>Deduction</th><th>Action Idea</th><th class="text-right">Potential Savings (₹)</th></tr></thead>';
+        html += '      <thead>';
+        html += '        <tr><th>Section</th><th>Key Action Proposal</th><th class="text-right">Est. Savings (₹)</th><th>Deadline</th></tr>';
+        html += '      </thead>';
         html += '      <tbody>';
-        var showCount = Math.min(5, suggestions.length);
+        var showCount = Math.min(6, suggestions.length);
         for (var k = 0; k < showCount; k++) {
           var sugg = suggestions[k];
           if (sugg.category !== 'regime') {
-            html += '        <tr><td><strong>' + sugg.section + '</strong></td><td>' + sugg.title + ' - ' + sugg.description + '</td><td class="text-right text-success">+' + window.Utils.formatCurrency(sugg.potentialSavings) + '</td></tr>';
+            html += '        <tr><td><strong>' + sugg.section + '</strong></td><td>' + sugg.title + ' - ' + sugg.description + '</td><td class="text-right text-success">+' + window.Utils.formatCurrency(sugg.potentialSavings) + '</td><td>' + sugg.deadline + '</td></tr>';
           }
         }
         html += '      </tbody>';
@@ -182,9 +276,29 @@
         html += '  </div>';
       }
 
+      // 7. Signature Block
+      html += '  <div class="signature-section">';
+      html += '    <div class="signature-box">';
+      html += '      <p><strong>Signature of the Assessee</strong></p>';
+      html += '      <br><br><br>';
+      html += '      <p>Name: ' + (userData.profile.name || 'Taxpayer') + '</p>';
+      html += '      <p>Date: ' + formattedDate + '</p>';
+      html += '    </div>';
+      html += '    <div class="signature-box">';
+      html += '      <p><strong>Verified by: Chartered Tax Engine</strong></p>';
+      html += '      <br><br>';
+      html += '      <div style="font-size: 10px; border: 1px dashed #444; padding: 4px; display: inline-block; text-align: left; background: #fafafa;">';
+      html += '        Audit Seal: KarDaan Digital Verified<br>';
+      html += '        AY: 2026-27 | FY: 2025-26<br>';
+      html += '        Code: KD-2026-CLIENT-SIDE';
+      html += '      </div>';
+      html += '      <p style="margin-top: 4px;">Date: ' + formattedDate + '</p>';
+      html += '    </div>';
+      html += '  </div>';
+
       // Disclaimer
       html += '  <div class="print-disclaimer">';
-      html += '    <p><strong>Disclaimer:</strong> This report is a draft tax computation summary generated by KarDaan Assistant for FY 2025-26 based on user inputs. It is intended for informational/educational purposes only and does not constitute official tax filing, legal, or professional chartered accountant advice. Always verify with official Income Tax Portal rules or a certified CA before paying or filing taxes.</p>';
+      html += '    <p><strong>Chartered Accountant Disclaimer:</strong> This computation report has been compiled by KarDaan (Digital Assistant) based strictly on data supplied client-side by the taxpayer. The calculations are simulated in accordance with the provisions of the Income Tax Act, 1961 as amended by subsequent Finance Acts for FY 2025-26 (AY 2026-27). This document does not constitute formal tax audit certification under Section 44AB, nor does it represent official CA advice. Taxpayers are advised to consult a certified Chartered Accountant or tax professional to verify filings, exemptions, or audits prior to formal submission on the e-filing portal.</p>';
       html += '  </div>';
 
       html += '</div>';
@@ -217,27 +331,30 @@
         '  body * { display: none !important; }' +
         '  #temp-print-div, #temp-print-div * { display: block !important; }' +
         '  #temp-print-div { position: absolute; left: 0; top: 0; width: 100%; }' +
-        '  .print-report { padding: 20px; font-family: "Inter", sans-serif; color: #000; background: #fff; }' +
-        '  .print-header { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px; }' +
-        '  .print-header h1 { font-size: 20px; font-weight: bold; margin: 0; }' +
-        '  .print-header p { margin: 2px 0; font-size: 11px; color: #555; }' +
+        '  .print-report { padding: 40px; font-family: "Georgia", "Times New Roman", serif; color: #000; background: #fff; line-height: 1.4; max-width: 800px; margin: 0 auto; }' +
+        '  .print-header { text-align: center; margin-bottom: 25px; border-bottom: 3px double #000; padding-bottom: 12px; }' +
+        '  .print-header h1 { font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; }' +
+        '  .print-header p { margin: 6px 0 0 0; font-size: 11px; font-style: italic; color: #333; }' +
+        '  .audit-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }' +
+        '  .audit-meta-table td { padding: 6px 10px; font-size: 11px; border: 1px solid #777; vertical-align: middle; }' +
+        '  .audit-meta-table td.label { font-weight: bold; background: #f4f4f4; width: 22%; text-transform: uppercase; font-size: 10px; color: #333; }' +
         '  .print-section { margin-bottom: 25px; page-break-inside: avoid; }' +
-        '  .print-section h2 { font-size: 14px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 4px; text-transform: uppercase; }' +
+        '  .print-section h2 { font-size: 12px; font-weight: bold; margin-bottom: 8px; border-bottom: 1.5px solid #000; padding-bottom: 3px; text-transform: uppercase; color: #1e3a8a; }' +
         '  .print-table { width: 100%; border-collapse: collapse; margin-top: 5px; }' +
-        '  .print-table th { background: #f0f0f0; border: 1px solid #ccc; padding: 6px 10px; font-size: 11px; text-align: left; text-transform: uppercase; }' +
-        '  .print-table td { border: 1px solid #ccc; padding: 6px 10px; font-size: 11px; }' +
-        '  .print-table-info { width: 100%; margin-bottom: 10px; }' +
-        '  .print-table-info td { padding: 4px 8px; font-size: 11px; }' +
-        '  .total-row td { font-weight: bold; background: #f9f9f9; }' +
-        '  .grand-total-row td { font-weight: bold; font-size: 12px; background: #eaeaea; border-top: 2px solid #000; border-bottom: 2px solid #000; }' +
-        '  .balance-due-row td { font-weight: bold; color: #d32f2f; background: #ffebee; }' +
-        '  .refund-due-row td { font-weight: bold; color: #2e7d32; background: #e8f5e9; }' +
-        '  .sub-row td { font-size: 10px; color: #555; padding-left: 20px; border-top: none; }' +
+        '  .print-table th { background: #1e3a8a; color: #ffffff !important; border: 1px solid #444; padding: 7px 10px; font-size: 10px; text-align: left; text-transform: uppercase; font-weight: bold; }' +
+        '  .print-table td { border: 1px solid #999; padding: 7px 10px; font-size: 11px; }' +
+        '  .total-row td { font-weight: bold; background: #fafafa; border-top: 1.5px solid #000; }' +
+        '  .double-total-row td { font-weight: bold; font-size: 12px; background: #eaeaea; border-top: 1.5px solid #000; border-bottom: 3px double #000 !important; }' +
+        '  .balance-due-row td { font-weight: bold; color: #b91c1c !important; background: #fef2f2; border: 1.5px solid #b91c1c; }' +
+        '  .refund-due-row td { font-weight: bold; color: #15803d !important; background: #f0fdf4; border: 1.5px solid #15803d; }' +
+        '  .sub-row td { font-size: 10px; color: #444; padding-left: 20px; border-top: none; }' +
         '  .text-right { text-align: right !important; }' +
         '  .text-center { text-align: center !important; }' +
-        '  .text-success { color: #2e7d32 !important; }' +
+        '  .text-success { color: #15803d !important; }' +
         '  .page-break { page-break-before: always; }' +
-        '  .print-disclaimer { margin-top: 30px; font-size: 9px; color: #777; line-height: 1.4; border-top: 1px solid #ccc; padding-top: 10px; }' +
+        '  .signature-section { margin-top: 50px; display: flex; justify-content: space-between; page-break-inside: avoid; }' +
+        '  .signature-box { width: 45%; border-top: 1.5px solid #000; text-align: center; padding-top: 8px; font-size: 11px; line-height: 1.5; }' +
+        '  .print-disclaimer { margin-top: 40px; font-size: 9px; color: #444; line-height: 1.5; border-top: 1.5px solid #000; padding-top: 10px; font-style: italic; text-align: justify; }' +
         '}';
       document.head.appendChild(printStyle);
 
