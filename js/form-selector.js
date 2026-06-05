@@ -38,13 +38,13 @@
       // Individual / HUF filing rules
       var hasBusiness = userData.income.business && userData.income.business.type && userData.income.business.type !== 'none';
       var hasCapitalGains = userData.income.capitalGains && 
-        (Number(userData.income.capitalGains.listed.ltcg || 0) > 0 || 
-         Number(userData.income.capitalGains.listed.stcg || 0) > 0 ||
-         Number(userData.income.capitalGains.property.ltcg || 0) > 0 || 
-         Number(userData.income.capitalGains.property.stcg || 0) > 0 ||
-         Number(userData.income.capitalGains.gold.ltcg || 0) > 0 || 
-         Number(userData.income.capitalGains.gold.stcg || 0) > 0 ||
-         Number(userData.income.capitalGains.debt.gains || 0) > 0);
+        (Number((userData.income.capitalGains.listed || {}).ltcg || 0) > 0 || 
+         Number((userData.income.capitalGains.listed || {}).stcg || 0) > 0 ||
+         Number((userData.income.capitalGains.property || {}).ltcg || 0) > 0 || 
+         Number((userData.income.capitalGains.property || {}).stcg || 0) > 0 ||
+         Number((userData.income.capitalGains.gold || {}).ltcg || 0) > 0 || 
+         Number((userData.income.capitalGains.gold || {}).stcg || 0) > 0 ||
+         Number((userData.income.capitalGains.debt || {}).gains || 0) > 0);
 
       var salaryGross = userData.income.salary ? Number(userData.income.salary.grossSalary || 0) : 0;
       var otherSources = userData.income.otherSources ? Number(userData.income.otherSources.total || 0) : 0;

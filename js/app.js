@@ -86,10 +86,37 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Navbar mobile menu logic
+  // ---------------------------------------------------------------------------
+  function setupNavbar() {
+    var hamburgerBtn = document.getElementById('hamburger-btn');
+    var navMenu = document.querySelector('.nav-menu');
+    if (!hamburgerBtn || !navMenu) return;
+
+    hamburgerBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      navMenu.classList.toggle('active');
+    });
+
+    navMenu.addEventListener('click', function (e) {
+      if (e.target.classList.contains('nav-link')) {
+        navMenu.classList.remove('active');
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      if (navMenu.classList.contains('active') && !navMenu.contains(e.target) && e.target !== hamburgerBtn) {
+        navMenu.classList.remove('active');
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Entry Point
   // ---------------------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', function () {
     setupTheme();
+    setupNavbar();
     setupRoutes();
     
     // Bind Landing Hero Call To Action

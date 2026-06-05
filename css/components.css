@@ -108,6 +108,29 @@
 [data-theme='light'] .theme-toggle .sun-icon { display: block; }
 [data-theme='light'] .theme-toggle .moon-icon { display: none; }
 
+/* Hamburger Menu Button */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  transition: background var(--transition-fast);
+}
+
+.hamburger:hover {
+  background: var(--bg-elevated);
+}
+
+.hamburger svg {
+  width: 24px;
+  height: 24px;
+}
+
 /* ── Cards ─────────────────────────────────────────────────── */
 .card {
   border-radius: var(--radius-2xl);

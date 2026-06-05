@@ -163,7 +163,14 @@
         otherGross += Number(os.other || 0);
       }
 
-      var grossTotalIncome = salaryNet + hpIncome + businessIncome + otherGross;
+      var hpSetOff = hpIncome;
+      if (regime === 'new') {
+        if (hpSetOff < 0) hpSetOff = 0;
+      } else {
+        if (hpSetOff < 0) hpSetOff = -Math.min(Math.abs(hpSetOff), 200000);
+      }
+
+      var grossTotalIncome = salaryNet + hpSetOff + businessIncome + otherGross;
 
       return {
         heads: {
@@ -171,6 +178,7 @@
           salaryStdDeduction: salaryStdDeduction,
           salaryNet: salaryNet,
           houseProperty: hpIncome,
+          hpSetOff: hpSetOff,
           hpDetails: hpDetails,
           business: businessIncome,
           stcg: capitalGainsNet.stcg,

@@ -183,7 +183,7 @@
         };
         footer.appendChild(printBtn);
       } else {
-        var backBtn = window.Utils.createElement('button', 'btn btn-secondary', '⬅ Back');
+        var backBtn = window.Utils.createElement('button', 'btn btn-secondary', '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px; margin-top: -2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" /></svg>Back');
         backBtn.onclick = function () { window.TaxWizard.prevStep(); };
         footer.appendChild(backBtn);
 
