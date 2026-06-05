@@ -306,7 +306,161 @@
         html += '  </div>';
       }
 
-      // 7. Signature Block
+      // 6. Legal Citations & Explanatory Notes
+      html += '  <div class="print-section page-break">';
+      html += '    <h2>VI. Legal Citations & Explanatory Notes (Schedules and Deductions)</h2>';
+      html += '    <div style="font-size: 11px; line-height: 1.5; color: #333;">';
+      
+      if (heads.salaryGross > 0) {
+        html += '      <p style="margin-bottom: 8px;"><strong>1. Schedule S (Income from Salary):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 16(ia) - Standard Deduction:</strong> A statutory flat deduction of ' + window.Utils.formatCurrency(activeRegime === 'new' ? 75000 : 50000) + ' has been applied from the Gross Salary. This is admissible to all salaried employees to cover employment-related expenses without requiring proof of expenditure.</li>';
+        if (userData.income.salary && Number(userData.income.salary.hra || 0) > 0 && activeRegime === 'old') {
+          html += '        <li style="margin-bottom: 4px;"><strong>Section 10(13A) - House Rent Allowance (HRA) Exemption:</strong> Exempt HRA is computed as the minimum of: (a) actual HRA received (' + window.Utils.formatCurrency(userData.income.salary.hra || 0) + '), (b) rent paid minus 10% of basic salary, and (c) 50% (metro) or 40% (non-metro) of basic salary. The excess portion is taxable under Schedule S.</li>';
+        }
+        html += '      </ul>';
+      }
+
+      if (heads.houseProperty !== 0 || heads.hpSetOff !== 0) {
+        html += '      <p style="margin-bottom: 8px;"><strong>2. Schedule HP (Income from House Property):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 24(a) - Standard Deduction (Rental Income):</strong> If rent is received, a flat 30% of Net Annual Value is allowed as a deduction for repairs and maintenance, irrespective of actual expenditure.</li>';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 24(b) - Home Loan Interest:</strong> Interest on housing loans is deductible up to ₹2,00,000 for self-occupied properties (Old Regime only). For let-out properties, actual interest is fully deductible.</li>';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 71 - Loss Set-off:</strong> Inter-head house property loss set-off is capped at -₹2,00,000 under the Old Regime, and disallowed (₹0 set-off) under the New Regime.</li>';
+        html += '      </ul>';
+      }
+
+      if (heads.business > 0) {
+        html += '      <p style="margin-bottom: 8px;"><strong>3. Schedule BP (Profits & Gains of Business or Profession):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        if (userData.income.business && userData.income.business.isPresumptive) {
+          html += '        <li style="margin-bottom: 4px;"><strong>Sections 44AD / 44ADA - Presumptive Taxation:</strong> Under presumptive schemes, net profits are deemed at 6%/8% of turnover (business) or 50% of receipts (professionals). Taxpayers are exempt from maintaining formal books of accounts (Sec 44AA) or CA audits (Sec 44AB).</li>';
+        } else {
+          html += '        <li style="margin-bottom: 4px;"><strong>Section 28 - Profits & Gains:</strong> Taxable business income is calculated as gross business revenue minus deductible business expenses and depreciation on assets.</li>';
+        }
+        html += '      </ul>';
+      }
+
+      if (heads.stcg > 0 || heads.ltcg > 0) {
+        html += '      <p style="margin-bottom: 8px;"><strong>4. Schedule CG (Capital Gains):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 111A - Short-Term Capital Gains:</strong> Gains on sale of listed equity shares/mutual funds held for less than 12 months are taxed at a flat rate of 20%.</li>';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 112A - Long-Term Capital Gains (Listed Equity):</strong> Gains on sale of listed equity held for 12 months or more are taxed at 12.5% on gains exceeding the statutory threshold of ₹1,25,000.</li>';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 112 - Other Capital Gains:</strong> LTCG on unlisted assets, gold, and real estate is taxed at 12.5% without indexation (Budget 2024 revised).</li>';
+        html += '      </ul>';
+      }
+
+      if (heads.otherSources > 0) {
+        html += '      <p style="margin-bottom: 8px;"><strong>5. Schedule OS (Income from Other Sources):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 56 - Other Sources:</strong> Bank interest, fixed deposits interest, and dividends are aggregated under this head and taxed at slab rates. Winnings from online games/lotteries are taxed at flat 30% under Sec 115BBJ.</li>';
+        html += '      </ul>';
+      }
+
+      if (activeRegime === 'old' && activeData.otherDeductions > 0) {
+        html += '      <p style="margin-bottom: 8px;"><strong>6. Schedule VIA (Chapter VI-A Deductions):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        var breakdown = activeData.deductionsBreakdown || {};
+        if (breakdown['80C'] > 0) {
+          html += '        <li style="margin-bottom: 4px;"><strong>Section 80C:</strong> Contributions to PPF, EPF, ELSS, and home loan principal are deductible up to the statutory cap of ₹1,50,000.</li>';
+        }
+        if (breakdown['80D'] > 0) {
+          html += '        <li style="margin-bottom: 4px;"><strong>Section 80D:</strong> Medical insurance premiums are deductible up to ₹25,000 for self/spouse/children (₹50,000 if senior citizen) and an additional ₹25,000/₹50,000 for parents.</li>';
+        }
+        if (breakdown['80CCD1B'] > 0) {
+          html += '        <li style="margin-bottom: 4px;"><strong>Section 80CCD(1B):</strong> Self-contribution to NPS is deductible up to an additional ₹50,000 outside the Section 80C cap.</li>';
+        }
+        if (breakdown['80TTA'] > 0) {
+          html += '        <li style="margin-bottom: 4px;"><strong>Section 80TTA:</strong> Savings bank interest is deductible up to ₹10,000.</li>';
+        }
+        if (breakdown['80TTB'] > 0) {
+          html += '        <li style="margin-bottom: 4px;"><strong>Section 80TTB:</strong> Savings and FD interest is deductible up to ₹50,000 for senior citizens.</li>';
+        }
+        html += '      </ul>';
+      }
+
+      if (activeData.rebate87A > 0) {
+        html += '      <p style="margin-bottom: 8px;"><strong>7. Section 87A Tax Rebate & Marginal Relief:</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '        <li style="margin-bottom: 4px;"><strong>Section 87A Rebate:</strong> Provides a rebate up to ₹60,000 (New Regime, income <= ₹12L) or ₹12,500 (Old Regime, income <= ₹5L), reducing net tax to zero.</li>';
+        if (activeRegime === 'new' && activeData.taxableSlabIncome > 1200000 && activeData.taxableSlabIncome <= 1212000) {
+          html += '        <li style="margin-bottom: 4px;"><strong>Marginal Relief:</strong> Granted since income slightly exceeds ₹12L. Caps the net tax liability to the exact income amount that exceeds ₹12,00,000, preventing a steep tax spike.</li>';
+        }
+        html += '      </ul>';
+      }
+
+      html += '    </div>';
+      html += '  </div>';
+
+      // 7. CA-Grade Compliance Audit Observations
+      html += '  <div class="print-section">';
+      html += '    <h2>VII. CA-Grade Compliance Audit Observation Report</h2>';
+      html += '    <table class="print-table">';
+      html += '      <thead>';
+      html += '        <tr><th>Audit Area</th><th>Observation / Flag</th><th>Severity</th><th>Recommended Next Step</th></tr>';
+      html += '      </thead>';
+      html += '      <tbody>';
+      
+      var auditChecks = window.TaxAuditor.runAudit(userData, taxResult);
+      if (auditChecks.length === 0) {
+        html += '        <tr><td colspan="4" class="text-center" style="color: #15803d; font-weight: bold;">✓ COMPLIANCE PASSED: No audit flags or warning alerts detected. All inputs align with standard rules under the Income Tax Act, 1961.</td></tr>';
+      } else {
+        for (var j = 0; j < auditChecks.length; j++) {
+          var check = auditChecks[j];
+          var severityColor = check.type === 'danger' ? '#b91c1c' : check.type === 'warning' ? '#b45309' : '#1e3a8a';
+          html += '        <tr>';
+          html += '          <td><strong>' + check.title + '</strong></td>';
+          html += '          <td>' + check.message + '</td>';
+          html += '          <td style="color: ' + severityColor + '; font-weight: bold; text-transform: uppercase;">' + check.type + '</td>';
+          html += '          <td>' + check.action + '</td>';
+          html += '        </tr>';
+        }
+      }
+      
+      html += '      </tbody>';
+      html += '    </table>';
+      html += '  </div>';
+
+      // 8. Document Checklist
+      html += '  <div class="print-section">';
+      html += '    <h2>VIII. Required Document Verification Checklist</h2>';
+      html += '    <p style="font-size: 11px; margin-bottom: 8px; color: #333;">To verify the calculations compiled in this statement and ensure successful filing, compile the following physical/digital verification documents:</p>';
+      html += '    <table class="print-table">';
+      html += '      <thead>';
+      html += '        <tr><th>Schedule Reference</th><th>Required Document Name</th><th>Source / Issuer</th><th>Verification Purpose</th></tr>';
+      html += '      </thead>';
+      html += '      <tbody>';
+      
+      if (heads.salaryGross > 0) {
+        html += '        <tr><td>Schedule S</td><td>Form 16 (Part A & B)</td><td>Employer</td><td>Verify gross salary, exemptions, and salary TDS.</td></tr>';
+        if (userData.income.salary && Number(userData.income.salary.hra || 0) > 0 && activeRegime === 'old') {
+          html += '        <tr><td>Schedule S (HRA)</td><td>Rent Receipts & Landlord PAN</td><td>Landlord</td><td>Verify tenancy and support HRA exemption. Mandatory if rent > ₹1L.</td></tr>';
+        }
+      }
+      
+      if (heads.houseProperty !== 0) {
+        html += '        <tr><td>Schedule HP</td><td>Home Loan Interest Certificate</td><td>Lending Bank / Financial Institution</td><td>Verify Section 24(b) interest and principal repayment.</td></tr>';
+      }
+      
+      if (heads.stcg > 0 || heads.ltcg > 0) {
+        html += '        <tr><td>Schedule CG</td><td>Capital Gains Ledger / Profit & Loss Statement</td><td>Stock Broker / Mutual Fund House</td><td>Verify purchase/sale dates, cost of acquisition, and STCG/LTCG rates.</td></tr>';
+      }
+      
+      if (heads.business > 0) {
+        html += '        <tr><td>Schedule BP</td><td>Turnover Statement / GST Returns (GSTR-1/3B)</td><td>GST Portal / Bank Ledger</td><td>Cross-verify presumptive turnover under Section 44AD/44ADA.</td></tr>';
+      }
+      
+      html += '      <tr><td>Schedule OS / All</td><td>Form 26AS & AIS / TIS Summary</td><td>Income Tax Portal (incometax.gov.in)</td><td>Verify all TDS deducted, interest earned, and transactions.</td></tr>';
+      
+      if (activeRegime === 'old' && activeData.otherDeductions > 0) {
+        html += '        <tr><td>Schedule VIA</td><td>Investment Receipts (PPF, ELSS, Insurances)</td><td>Fund House / Insurance Company</td><td>Provide statutory proof for Section 80C and 80D claims.</td></tr>';
+      }
+      
+      html += '      </tbody>';
+      html += '    </table>';
+      html += '  </div>';
+
+      // 9. Signature Block
       html += '  <div class="signature-section">';
       html += '    <div class="signature-box">';
       html += '      <p><strong>Signature of the Assessee</strong></p>';
