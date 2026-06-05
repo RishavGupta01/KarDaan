@@ -832,7 +832,13 @@
 
     render_review: function (el) {
       var heads = window.TaxEngine.computeGrossIncome(state.income, 'new', 'below60').heads;
-      var totalDeds = state.deductions['80C'] + state.deductions['80CCD1B'] + state.deductions['80D_self'] + state.deductions['80D_parents'];
+      
+      var totalDeds = 0;
+      var d = state.deductions || {};
+      var dedKeys = ['80C', '80CCC', '80CCD1', '80CCD1B', '80CCD2', '80D_self', '80D_parents', '80E', '80G', '80TTA', '80TTB', '80U', '80DD', '80DDB'];
+      for (var k = 0; k < dedKeys.length; k++) {
+        totalDeds += Number(d[dedKeys[k]] || 0);
+      }
       
       var rawHpVal = 0;
       var hasHpInterest = false;

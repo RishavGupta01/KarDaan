@@ -490,7 +490,8 @@
 
       // Section 87A rebate for new regime (Enhanced in Budget 2025 to 12 Lakhs)
       var newRebate = 0;
-      var totalTaxableIncomeNew = newTaxableSlabIncome + newGross.heads.stcgListed + newGross.heads.taxableLtcgListed + newGross.heads.ltcgOther;
+      var totalTaxableIncomeNew = newTaxableSlabIncome + newGross.heads.stcgListed + newGross.heads.ltcgListed + newGross.heads.ltcgOther;
+      totalTaxableIncomeNew = Math.round(totalTaxableIncomeNew / 10) * 10;
       
       if (totalTaxableIncomeNew <= TD.newRegime.rebate87A.limit) {
         // Section 87A rebate is capped at the tax on slab income + tax on STCG (not allowed on listed LTCG 112A)
@@ -536,7 +537,8 @@
 
       // Section 87A rebate for old regime (limit: 5 Lakhs)
       var oldRebate = 0;
-      var totalTaxableIncomeOld = oldTaxableSlabIncome + oldGross.heads.stcgListed + oldGross.heads.taxableLtcgListed + oldGross.heads.ltcgOther;
+      var totalTaxableIncomeOld = oldTaxableSlabIncome + oldGross.heads.stcgListed + oldGross.heads.ltcgListed + oldGross.heads.ltcgOther;
+      totalTaxableIncomeOld = Math.round(totalTaxableIncomeOld / 10) * 10;
       if (totalTaxableIncomeOld <= TD.oldRegime.rebate87A.limit) {
         oldRebate = Math.min(oldTaxBeforeRebate, TD.oldRegime.rebate87A.maxRebate);
       }

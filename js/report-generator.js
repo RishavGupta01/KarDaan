@@ -635,12 +635,21 @@
 
       for (var r = 0; r < rows.length; r++) {
         var row = rows[r];
+        var badgeHtml = '';
+        if (row.category.indexOf('Deductions') !== -1 || row.category.indexOf('Salary') !== -1 || row.category.indexOf('Profile') !== -1 || row.category.indexOf('Gains') !== -1 || row.category.indexOf('Business') !== -1 || row.category.indexOf('Other') !== -1 || row.category.indexOf('Pre-Paid') !== -1) {
+          var isDisallowed = (row.impact.indexOf('Ineligible') !== -1 || row.impact.indexOf('Disallowed') !== -1 || row.impact.indexOf('disallowed') !== -1);
+          if (isDisallowed) {
+            badgeHtml = '<span class="status-badge status-disallowed">Disallowed</span> ';
+          } else if (row.category.indexOf('Deductions') !== -1 || row.category.indexOf('Salary') !== -1 || row.category.indexOf('Gains') !== -1 || row.category.indexOf('Business') !== -1 || row.category.indexOf('Other') !== -1) {
+            badgeHtml = '<span class="status-badge status-allowed">Allowed</span> ';
+          }
+        }
         html += '    <tr>';
         html += '      <td><strong>' + row.category + '</strong></td>';
         html += '      <td>' + row.input + '</td>';
         html += '      <td class="text-right">' + row.value + '</td>';
         html += '      <td><span style="font-size: 9px; color: #555;">' + row.source + '</span></td>';
-        html += '      <td style="font-size: 9px; line-height: 1.3; color: #333;">' + row.impact + '</td>';
+        html += '      <td style="font-size: 9px; line-height: 1.3; color: #333;">' + badgeHtml + row.impact + '</td>';
         html += '    </tr>';
       }
 
@@ -1433,18 +1442,18 @@
         '  body > *:not(#temp-print-div) { display: none !important; }' +
         '  #temp-print-div, #temp-print-div * { display: revert; }' +
         '  #temp-print-div { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }' +
-        '  .print-report { padding: 20px; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #1e293b; background: #fff; line-height: 1.5; max-width: 920px; margin: 0 auto; font-size: 10px; }' +
+        '  .print-report { padding: 25px; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #0f172a; background: #fff; line-height: 1.5; max-width: 920px; margin: 0 auto; font-size: 10px; }' +
         '  .print-header { display: flex !important; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 25px; }' +
-        '  .print-header h1 { font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }' +
-        '  .print-header p { margin: 4px 0 0 0; font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #475569; }' +
+        '  .print-header h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }' +
+        '  .print-header p { margin: 4px 0 0 0; font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #64748b; }' +
         '  .audit-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #fff; }' +
-        '  .audit-meta-table td { padding: 6px 10px; font-size: 10px; border: 1px solid #cbd5e1; vertical-align: middle; color: #334155; }' +
-        '  .audit-meta-table td.label { font-weight: 700; background: #f1f5f9; width: 22%; text-transform: uppercase; font-size: 8px; letter-spacing: 0.5px; color: #475569; }' +
+        '  .audit-meta-table td { padding: 6px 10px; font-size: 9px; border: 1px solid #e2e8f0; vertical-align: middle; color: #334155; }' +
+        '  .audit-meta-table td.label { font-weight: 700; background: #f1f5f9; width: 22%; text-transform: uppercase; font-size: 8px; letter-spacing: 0.5px; color: #64748b; }' +
         '  .print-section { margin-bottom: 28px; page-break-inside: avoid; }' +
-        '  .print-section h2 { font-size: 11px; font-weight: 700; margin-top: 0; margin-bottom: 10px; border-bottom: 1.5px solid #0f172a; padding-bottom: 4px; text-transform: uppercase; color: #0f172a; letter-spacing: 0.5px; }' +
+        '  .print-section h2 { font-size: 13px; font-weight: 700; margin-top: 0; margin-bottom: 12px; border-left: 3px solid #0f172a; padding-left: 8px; text-transform: uppercase; color: #0f172a; letter-spacing: 0.5px; border-bottom: none !important; }' +
         '  .print-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 5px; }' +
-        '  .print-table th { background: #0f172a; color: #ffffff !important; border: 1px solid #0f172a; padding: 7px 10px; font-size: 8px; text-align: left; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }' +
-        '  .print-table td { border: 1px solid #cbd5e1; padding: 7px 10px; font-size: 9px; vertical-align: middle; color: #334155; }' +
+        '  .print-table th { background: #0f172a; color: #ffffff !important; border-top: none; border-left: none; border-right: none; border-bottom: 2px solid #0f172a; padding: 7px 10px; font-size: 8px; text-align: left; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }' +
+        '  .print-table td { border-top: none; border-left: none; border-right: none; border-bottom: 1px solid #e2e8f0; padding: 7px 10px; font-size: 9px; vertical-align: middle; color: #334155; }' +
         '  .print-table tr:nth-child(even) td { background-color: #f8fafc; }' +
         '  .total-row td { font-weight: 700; background: #f1f5f9 !important; color: #0f172a !important; border-top: 1.5px solid #0f172a; border-bottom: 1.5px solid #0f172a; }' +
         '  .double-total-row td { font-weight: 700; font-size: 10px; background: #e2e8f0 !important; color: #0f172a !important; border-top: 1.5px solid #0f172a; border-bottom: 3px double #0f172a !important; }' +
@@ -1456,8 +1465,11 @@
         '  .text-success { color: #166534 !important; }' +
         '  .page-break { page-break-before: always; }' +
         '  .signature-section { margin-top: 45px; display: flex; justify-content: space-between; page-break-inside: avoid; }' +
-        '  .signature-box { width: 45%; border-top: 1.5px solid #0f172a; text-align: center; padding-top: 10px; font-size: 9px; line-height: 1.6; color: #475569; }' +
+        '  .signature-box { width: 45%; border-top: 1.5px solid #0f172a; text-align: center; padding-top: 10px; font-size: 9px; line-height: 1.6; color: #64748b; }' +
         '  .print-disclaimer { margin-top: 35px; font-size: 8px; color: #64748b; line-height: 1.5; border-top: 1.5px solid #e2e8f0; padding-top: 10px; font-style: italic; text-align: justify; }' +
+        '  .status-badge { display: inline-block; padding: 2px 6px; font-size: 7px; font-weight: 700; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 6px; vertical-align: middle; }' +
+        '  .status-disallowed { background-color: #FEF3C7 !important; color: #92400E !important; }' +
+        '  .status-allowed { background-color: #D1FAE5 !important; color: #065F46 !important; }' +
         '  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }' +
         '}';
       document.head.appendChild(printStyle);
