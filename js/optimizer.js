@@ -266,7 +266,7 @@
               category: 'salary',
               section: 'Section 80CCD(2)',
               title: 'Employer NPS Contribution in CTC',
-              description: 'Restructure your CTC to have your employer contribute up to ' + (maxCCD2_pct * 100) + '% of basic salary directly to your NPS Tier-1. This is fully tax-free in both regimes.',
+              description: 'Restructure your CTC to have your employer contribute up to ' + Math.round(maxCCD2_pct * 100) + '% of basic salary directly to your NPS Tier-1. This is fully tax-free in both regimes.',
               currentUtilized: claimedCCD2,
               maxLimit: basicPlusDA * maxCCD2_pct,
               remainingCapacity: gapAmount,

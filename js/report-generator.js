@@ -93,9 +93,16 @@
       html += '    </tr>';
       html += '  </table>';
 
+      // Section I: Inputs Ledger
+      html += '  <div class="print-section">';
+      html += '    <h2>I. Assessee Inputs Ledger (Taxpayer Declaration)</h2>';
+      html += '    <p style="font-size: 10px; margin-bottom: 6px; color: #333;">The following values were declared by the taxpayer during the interview and serve as the baseline input data for this tax computation statement:</p>';
+      html += this.generateInputsLedgerTable(userData, activeRegime);
+      html += '  </div>';
+
       // 2. Main computation summary
       html += '  <div class="print-section">';
-      html += '    <h2>I. Particulars of Computation of Total Income</h2>';
+      html += '    <h2>II. Particulars of Computation of Total Income</h2>';
       html += '    <table class="print-table">';
       html += '      <thead>';
       html += '        <tr>';
@@ -187,7 +194,7 @@
 
       // 3. Schedule Chapter VI-A Deductions
       html += '  <div class="print-section">';
-      html += '    <h2>II. Schedule VIA: Details of Deductions Claimed</h2>';
+      html += '    <h2>III. Schedule VIA: Details of Deductions Claimed</h2>';
       html += '    <table class="print-table">';
       html += '      <thead>';
       html += '        <tr><th>Section</th><th>Particulars / Description</th><th class="text-right">Max Limit (₹)</th><th class="text-right">Claimed Amount (₹)</th></tr>';
@@ -214,14 +221,14 @@
           html += '        <tr><td colspan="4" class="text-center text-muted">No Chapter VI-A deductions claimed under the Old Regime.</td></tr>';
         }
       }
-      html += '        <tr class="total-row"><td><strong>Total</strong></td><td colspan="2"></td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.otherDeductions) + '</strong></td></tr>';
+      html += '        <tr class="total-row"><td><strong>Total Deductions</strong></td><td colspan="2"></td><td class="text-right"><strong>' + window.Utils.formatCurrency(activeData.otherDeductions) + '</strong></td></tr>';
       html += '      </tbody>';
       html += '    </table>';
       html += '  </div>';
 
       // 4. Detailed Tax Computation
       html += '  <div class="print-section">';
-      html += '    <h2>III. Particulars of Tax Liability Computation</h2>';
+      html += '    <h2>IV. Particulars of Tax Liability Computation</h2>';
       html += '    <table class="print-table">';
       html += '      <thead>';
       html += '        <tr><th>Description</th><th class="text-right">Rate</th><th class="text-right">Amount (₹)</th></tr>';
@@ -267,9 +274,25 @@
       html += '    </table>';
       html += '  </div>';
 
+      // Section V: Slab & Surcharge Step-by-Step Computations (Transparency Block)
+      html += '  <div class="print-section page-break">';
+      html += '    <h2>V. Progressive Slab & Surcharge Step-by-Step Computations</h2>';
+      html += '    <p style="font-size: 10px; margin-bottom: 6px; color: #333;">The step-by-step breakdown of progressive slab rates applied to taxable income is detailed below for audit verification:</p>';
+      html += this.generateDetailedSlabCalculationTable(activeData.taxableSlabIncome, activeRegime, window.Utils.getAgeCategory(Number(userData.profile.age || 30)));
+      
+      html += '    <div style="font-size: 9px; line-height: 1.4; margin-top: 10px; border: 1px solid #ddd; padding: 10px; background: #fafafa;">';
+      if (activeData.surcharge > 0) {
+        html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Computation:</strong> Taxable income exceeds the surcharge threshold. Surcharge is computed at progressive rate on Tax After Rebate: ' + window.Utils.formatCurrency(activeData.slabTax + activeData.capitalGainsTax - activeData.rebate87A) + ' × surcharge rate = ' + window.Utils.formatCurrency(activeData.surcharge) + '.</p>';
+      } else {
+        html += '      <p style="margin-bottom: 4px;"><strong>Surcharge Audit Check:</strong> Surcharge is not applicable as total taxable income (' + window.Utils.formatCurrency(activeData.taxableSlabIncome + activeData.heads.stcg + activeData.heads.ltcg) + ') does not exceed ₹50,00,000 threshold under Section 2(3) of the Finance Act.</p>';
+      }
+      html += '      <p style="margin-bottom: 0;"><strong>Health & Education Cess:</strong> Cess is computed flat at 4% under Section 2(11) of the Finance Act on (Tax after Rebate + Surcharge): (' + window.Utils.formatCurrency(Math.max(0, activeData.slabTax + activeData.capitalGainsTax - activeData.rebate87A)) + ' + ' + window.Utils.formatCurrency(activeData.surcharge) + ') × 4% = ' + window.Utils.formatCurrency(activeData.cess) + '.</p>';
+      html += '    </div>';
+      html += '  </div>';
+
       // 5. Dual Regime Comparison Statement
       html += '  <div class="print-section">';
-      html += '    <h2>IV. Regime Suitability & Comparison Statement</h2>';
+      html += '    <h2>VI. Regime Suitability & Comparison Statement</h2>';
       html += '    <table class="print-table">';
       html += '      <thead>';
       html += '        <tr><th>Particulars / Head of Income</th><th class="text-right">Old Regime (₹)</th><th class="text-right">New Regime (₹)</th></tr>';
@@ -288,7 +311,7 @@
       // 6. Tax Optimizer advice
       if (suggestions.length > 0) {
         html += '  <div class="print-section page-break">';
-        html += '    <h2>V. Schedule of Recommended Tax Optimization Strategies</h2>';
+        html += '    <h2>VII. Schedule of Recommended Tax Optimization Strategies</h2>';
         html += '    <table class="print-table">';
         html += '      <thead>';
         html += '        <tr><th>Section</th><th>Key Action Proposal</th><th class="text-right">Est. Savings (₹)</th><th>Deadline</th></tr>';
@@ -308,12 +331,12 @@
 
       // 6. Legal Citations & Explanatory Notes
       html += '  <div class="print-section page-break">';
-      html += '    <h2>VI. Legal Citations & Explanatory Notes (Schedules and Deductions)</h2>';
-      html += '    <div style="font-size: 11px; line-height: 1.5; color: #333;">';
+      html += '    <h2>VIII. Legal Citations & Explanatory Notes (Schedules and Deductions)</h2>';
+      html += '    <div style="font-size: 10px; line-height: 1.5; color: #333;">';
       
       if (heads.salaryGross > 0) {
-        html += '      <p style="margin-bottom: 8px;"><strong>1. Schedule S (Income from Salary):</strong></p>';
-        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '      <p style="margin-bottom: 6px;"><strong>1. Schedule S (Income from Salary):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 10px; list-style-type: square;">';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 16(ia) - Standard Deduction:</strong> A statutory flat deduction of ' + window.Utils.formatCurrency(activeRegime === 'new' ? 75000 : 50000) + ' has been applied from the Gross Salary. This is admissible to all salaried employees to cover employment-related expenses without requiring proof of expenditure.</li>';
         if (userData.income.salary && Number(userData.income.salary.hra || 0) > 0 && activeRegime === 'old') {
           html += '        <li style="margin-bottom: 4px;"><strong>Section 10(13A) - House Rent Allowance (HRA) Exemption:</strong> Exempt HRA is computed as the minimum of: (a) actual HRA received (' + window.Utils.formatCurrency(userData.income.salary.hra || 0) + '), (b) rent paid minus 10% of basic salary, and (c) 50% (metro) or 40% (non-metro) of basic salary. The excess portion is taxable under Schedule S.</li>';
@@ -322,8 +345,8 @@
       }
 
       if (heads.houseProperty !== 0 || heads.hpSetOff !== 0) {
-        html += '      <p style="margin-bottom: 8px;"><strong>2. Schedule HP (Income from House Property):</strong></p>';
-        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '      <p style="margin-bottom: 6px;"><strong>2. Schedule HP (Income from House Property):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 10px; list-style-type: square;">';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 24(a) - Standard Deduction (Rental Income):</strong> If rent is received, a flat 30% of Net Annual Value is allowed as a deduction for repairs and maintenance, irrespective of actual expenditure.</li>';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 24(b) - Home Loan Interest:</strong> Interest on housing loans is deductible up to ₹2,00,000 for self-occupied properties (Old Regime only). For let-out properties, actual interest is fully deductible.</li>';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 71 - Loss Set-off:</strong> Inter-head house property loss set-off is capped at -₹2,00,000 under the Old Regime, and disallowed (₹0 set-off) under the New Regime.</li>';
@@ -331,8 +354,8 @@
       }
 
       if (heads.business > 0) {
-        html += '      <p style="margin-bottom: 8px;"><strong>3. Schedule BP (Profits & Gains of Business or Profession):</strong></p>';
-        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '      <p style="margin-bottom: 6px;"><strong>3. Schedule BP (Profits & Gains of Business or Profession):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 10px; list-style-type: square;">';
         if (userData.income.business && userData.income.business.isPresumptive) {
           html += '        <li style="margin-bottom: 4px;"><strong>Sections 44AD / 44ADA - Presumptive Taxation:</strong> Under presumptive schemes, net profits are deemed at 6%/8% of turnover (business) or 50% of receipts (professionals). Taxpayers are exempt from maintaining formal books of accounts (Sec 44AA) or CA audits (Sec 44AB).</li>';
         } else {
@@ -342,8 +365,8 @@
       }
 
       if (heads.stcg > 0 || heads.ltcg > 0) {
-        html += '      <p style="margin-bottom: 8px;"><strong>4. Schedule CG (Capital Gains):</strong></p>';
-        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '      <p style="margin-bottom: 6px;"><strong>4. Schedule CG (Capital Gains):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 10px; list-style-type: square;">';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 111A - Short-Term Capital Gains:</strong> Gains on sale of listed equity shares/mutual funds held for less than 12 months are taxed at a flat rate of 20%.</li>';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 112A - Long-Term Capital Gains (Listed Equity):</strong> Gains on sale of listed equity held for 12 months or more are taxed at 12.5% on gains exceeding the statutory threshold of ₹1,25,000.</li>';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 112 - Other Capital Gains:</strong> LTCG on unlisted assets, gold, and real estate is taxed at 12.5% without indexation (Budget 2024 revised).</li>';
@@ -351,15 +374,15 @@
       }
 
       if (heads.otherSources > 0) {
-        html += '      <p style="margin-bottom: 8px;"><strong>5. Schedule OS (Income from Other Sources):</strong></p>';
-        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '      <p style="margin-bottom: 6px;"><strong>5. Schedule OS (Income from Other Sources):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 10px; list-style-type: square;">';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 56 - Other Sources:</strong> Bank interest, fixed deposits interest, and dividends are aggregated under this head and taxed at slab rates. Winnings from online games/lotteries are taxed at flat 30% under Sec 115BBJ.</li>';
         html += '      </ul>';
       }
 
       if (activeRegime === 'old' && activeData.otherDeductions > 0) {
-        html += '      <p style="margin-bottom: 8px;"><strong>6. Schedule VIA (Chapter VI-A Deductions):</strong></p>';
-        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '      <p style="margin-bottom: 6px;"><strong>6. Schedule VIA (Chapter VI-A Deductions):</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 10px; list-style-type: square;">';
         var breakdown = activeData.deductionsBreakdown || {};
         if (breakdown['80C'] > 0) {
           html += '        <li style="margin-bottom: 4px;"><strong>Section 80C:</strong> Contributions to PPF, EPF, ELSS, and home loan principal are deductible up to the statutory cap of ₹1,50,000.</li>';
@@ -380,11 +403,11 @@
       }
 
       if (activeData.rebate87A > 0) {
-        html += '      <p style="margin-bottom: 8px;"><strong>7. Section 87A Tax Rebate & Marginal Relief:</strong></p>';
-        html += '      <ul style="margin-left: 20px; margin-bottom: 12px; list-style-type: square;">';
+        html += '      <p style="margin-bottom: 6px;"><strong>7. Section 87A Tax Rebate & Marginal Relief:</strong></p>';
+        html += '      <ul style="margin-left: 20px; margin-bottom: 10px; list-style-type: square;">';
         html += '        <li style="margin-bottom: 4px;"><strong>Section 87A Rebate:</strong> Provides a rebate up to ₹60,000 (New Regime, income <= ₹12L) or ₹12,500 (Old Regime, income <= ₹5L), reducing net tax to zero.</li>';
         if (activeRegime === 'new' && activeData.taxableSlabIncome > 1200000 && activeData.taxableSlabIncome <= 1212000) {
-          html += '        <li style="margin-bottom: 4px;"><strong>Marginal Relief:</strong> Granted since income slightly exceeds ₹12L. Caps the net tax liability to the exact income amount that exceeds ₹12,00,000, preventing a steep tax spike.</li>';
+          html += '        <li style="margin-bottom: 4px;"><strong>Marginal Relief:</strong> Granted since income slightly exceeds ₹12L. Caps the net tax liability to the exact income amount that exceeds ₹12,0,000, preventing a steep tax spike.</li>';
         }
         html += '      </ul>';
       }
@@ -394,7 +417,7 @@
 
       // 7. CA-Grade Compliance Audit Observations
       html += '  <div class="print-section">';
-      html += '    <h2>VII. CA-Grade Compliance Audit Observation Report</h2>';
+      html += '    <h2>IX. CA-Grade Compliance Audit Observation Report</h2>';
       html += '    <table class="print-table">';
       html += '      <thead>';
       html += '        <tr><th>Audit Area</th><th>Observation / Flag</th><th>Severity</th><th>Recommended Next Step</th></tr>';
@@ -422,42 +445,10 @@
       html += '  </div>';
 
       // 8. Document Checklist
-      html += '  <div class="print-section">';
-      html += '    <h2>VIII. Required Document Verification Checklist</h2>';
-      html += '    <p style="font-size: 11px; margin-bottom: 8px; color: #333;">To verify the calculations compiled in this statement and ensure successful filing, compile the following physical/digital verification documents:</p>';
-      html += '    <table class="print-table">';
-      html += '      <thead>';
-      html += '        <tr><th>Schedule Reference</th><th>Required Document Name</th><th>Source / Issuer</th><th>Verification Purpose</th></tr>';
-      html += '      </thead>';
-      html += '      <tbody>';
-      
-      if (heads.salaryGross > 0) {
-        html += '        <tr><td>Schedule S</td><td>Form 16 (Part A & B)</td><td>Employer</td><td>Verify gross salary, exemptions, and salary TDS.</td></tr>';
-        if (userData.income.salary && Number(userData.income.salary.hra || 0) > 0 && activeRegime === 'old') {
-          html += '        <tr><td>Schedule S (HRA)</td><td>Rent Receipts & Landlord PAN</td><td>Landlord</td><td>Verify tenancy and support HRA exemption. Mandatory if rent > ₹1L.</td></tr>';
-        }
-      }
-      
-      if (heads.houseProperty !== 0) {
-        html += '        <tr><td>Schedule HP</td><td>Home Loan Interest Certificate</td><td>Lending Bank / Financial Institution</td><td>Verify Section 24(b) interest and principal repayment.</td></tr>';
-      }
-      
-      if (heads.stcg > 0 || heads.ltcg > 0) {
-        html += '        <tr><td>Schedule CG</td><td>Capital Gains Ledger / Profit & Loss Statement</td><td>Stock Broker / Mutual Fund House</td><td>Verify purchase/sale dates, cost of acquisition, and STCG/LTCG rates.</td></tr>';
-      }
-      
-      if (heads.business > 0) {
-        html += '        <tr><td>Schedule BP</td><td>Turnover Statement / GST Returns (GSTR-1/3B)</td><td>GST Portal / Bank Ledger</td><td>Cross-verify presumptive turnover under Section 44AD/44ADA.</td></tr>';
-      }
-      
-      html += '      <tr><td>Schedule OS / All</td><td>Form 26AS & AIS / TIS Summary</td><td>Income Tax Portal (incometax.gov.in)</td><td>Verify all TDS deducted, interest earned, and transactions.</td></tr>';
-      
-      if (activeRegime === 'old' && activeData.otherDeductions > 0) {
-        html += '        <tr><td>Schedule VIA</td><td>Investment Receipts (PPF, ELSS, Insurances)</td><td>Fund House / Insurance Company</td><td>Provide statutory proof for Section 80C and 80D claims.</td></tr>';
-      }
-      
-      html += '      </tbody>';
-      html += '    </table>';
+      html += '  <div class="print-section page-break">';
+      html += '    <h2>X. Required Document Verification Checklist</h2>';
+      html += '    <p style="font-size: 10px; margin-bottom: 6px; color: #333;">The following checklist details the exact documents and verification steps required to validate the declarations made in this computation sheet and ensure compliance under the Income Tax Act, 1961:</p>';
+      html += this.generateDetailedChecklist(userData, activeRegime, heads);
       html += '  </div>';
 
       // 9. Signature Block
@@ -471,7 +462,7 @@
       html += '    <div class="signature-box">';
       html += '      <p><strong>Verified by: KarDaan Tax Audit Engine</strong></p>';
       html += '      <br><br>';
-      html += '      <div style="font-size: 10px; border: 1px dashed #1e3a8a; padding: 6px; display: inline-block; text-align: left; background: #f0f4ff; color: #1e3a8a;">';
+      html += '      <div style="font-size: 9px; border: 1px dashed #1e3a8a; padding: 6px; display: inline-block; text-align: left; background: #f0f4ff; color: #1e3a8a;">';
       html += '        <strong>TAX COMPUTATION AUDITED</strong><br>';
       html += '        Audit Code: ' + udin + '<br>';
       html += '        Engine Code: KD-AUDIT-2026<br>';
@@ -513,33 +504,34 @@
       printStyle.id = 'temp-print-style';
       printStyle.innerHTML = 
         '@media print {' +
-        '  body * { display: none !important; }' +
-        '  #temp-print-div, #temp-print-div * { display: block !important; }' +
-        '  #temp-print-div { position: absolute; left: 0; top: 0; width: 100%; }' +
-        '  .print-report { padding: 40px; font-family: "Georgia", "Times New Roman", serif; color: #000; background: #fff; line-height: 1.4; max-width: 800px; margin: 0 auto; }' +
-        '  .print-header { text-align: center; margin-bottom: 25px; border-bottom: 3px double #000; padding-bottom: 12px; }' +
-        '  .print-header h1 { font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; }' +
-        '  .print-header p { margin: 6px 0 0 0; font-size: 11px; font-style: italic; color: #333; }' +
-        '  .audit-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }' +
-        '  .audit-meta-table td { padding: 6px 10px; font-size: 11px; border: 1px solid #777; vertical-align: middle; }' +
-        '  .audit-meta-table td.label { font-weight: bold; background: #f4f4f4; width: 22%; text-transform: uppercase; font-size: 10px; color: #333; }' +
+        '  body > *:not(#temp-print-div) { display: none !important; }' +
+        '  #temp-print-div, #temp-print-div * { display: revert; }' +
+        '  #temp-print-div { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }' +
+        '  .print-report { padding: 30px 40px; font-family: "Georgia", "Times New Roman", serif; color: #000; background: #fff; line-height: 1.4; max-width: 900px; margin: 0 auto; }' +
+        '  .print-header { text-align: center; margin-bottom: 20px; border-bottom: 3px double #000; padding-bottom: 10px; }' +
+        '  .print-header h1 { font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 1px; }' +
+        '  .print-header p { margin: 6px 0 0 0; font-size: 10px; font-style: italic; color: #333; }' +
+        '  .audit-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }' +
+        '  .audit-meta-table td { padding: 6px 8px; font-size: 10px; border: 1px solid #777; vertical-align: middle; }' +
+        '  .audit-meta-table td.label { font-weight: bold; background: #f4f4f4; width: 22%; text-transform: uppercase; font-size: 9px; color: #333; }' +
         '  .print-section { margin-bottom: 25px; page-break-inside: avoid; }' +
-        '  .print-section h2 { font-size: 12px; font-weight: bold; margin-bottom: 8px; border-bottom: 1.5px solid #000; padding-bottom: 3px; text-transform: uppercase; color: #1e3a8a; }' +
+        '  .print-section h2 { font-size: 11px; font-weight: bold; margin-bottom: 8px; border-bottom: 1.5px solid #000; padding-bottom: 3px; text-transform: uppercase; color: #1e3a8a; }' +
         '  .print-table { width: 100%; border-collapse: collapse; margin-top: 5px; }' +
-        '  .print-table th { background: #1e3a8a; color: #ffffff !important; border: 1px solid #444; padding: 7px 10px; font-size: 10px; text-align: left; text-transform: uppercase; font-weight: bold; }' +
-        '  .print-table td { border: 1px solid #999; padding: 7px 10px; font-size: 11px; }' +
-        '  .total-row td { font-weight: bold; background: #fafafa; border-top: 1.5px solid #000; }' +
-        '  .double-total-row td { font-weight: bold; font-size: 12px; background: #eaeaea; border-top: 1.5px solid #000; border-bottom: 3px double #000 !important; }' +
+        '  .print-table th { background: #1e3a8a; color: #ffffff !important; border: 1px solid #444; padding: 6px 8px; font-size: 9px; text-align: left; text-transform: uppercase; font-weight: bold; }' +
+        '  .print-table td { border: 1px solid #aaa; padding: 6px 8px; font-size: 10px; vertical-align: middle; }' +
+        '  .total-row td { font-weight: bold; background: #fafafa; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; }' +
+        '  .double-total-row td { font-weight: bold; font-size: 11px; background: #eaeaea; border-top: 1.5px solid #000; border-bottom: 3px double #000 !important; }' +
         '  .balance-due-row td { font-weight: bold; color: #b91c1c !important; background: #fef2f2; border: 1.5px solid #b91c1c; }' +
         '  .refund-due-row td { font-weight: bold; color: #15803d !important; background: #f0fdf4; border: 1.5px solid #15803d; }' +
-        '  .sub-row td { font-size: 10px; color: #444; padding-left: 20px; border-top: none; }' +
+        '  .sub-row td { font-size: 9px; color: #444; padding-left: 20px; border-top: none; }' +
         '  .text-right { text-align: right !important; }' +
         '  .text-center { text-align: center !important; }' +
         '  .text-success { color: #15803d !important; }' +
         '  .page-break { page-break-before: always; }' +
-        '  .signature-section { margin-top: 50px; display: flex; justify-content: space-between; page-break-inside: avoid; }' +
-        '  .signature-box { width: 45%; border-top: 1.5px solid #000; text-align: center; padding-top: 8px; font-size: 11px; line-height: 1.5; }' +
-        '  .print-disclaimer { margin-top: 40px; font-size: 9px; color: #444; line-height: 1.5; border-top: 1.5px solid #000; padding-top: 10px; font-style: italic; text-align: justify; }' +
+        '  .signature-section { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }' +
+        '  .signature-box { width: 45%; border-top: 1.5px solid #000; text-align: center; padding-top: 8px; font-size: 10px; line-height: 1.5; }' +
+        '  .print-disclaimer { margin-top: 30px; font-size: 8px; color: #444; line-height: 1.4; border-top: 1.5px solid #000; padding-top: 8px; font-style: italic; text-align: justify; }' +
+        '  .print-table tr:nth-child(even) td { background-color: #fafafa; }' +
         '}';
       document.head.appendChild(printStyle);
 
