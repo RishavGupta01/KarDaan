@@ -907,6 +907,14 @@
         '    <h3 style="margin-bottom: 20px;"> Recommended Optimization Ideas</h3>' +
         '    <div class="optimization-grid" id="dashboard-opts"></div>' +
         '  </div>' +
+        '</div>' +
+        '<div class="card" style="margin-top: var(--space-6);">' +
+        '  <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">' +
+        '    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px; color: var(--color-warning-500);"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>' +
+        '    Chartered Accountant Audit & Compliance Review' +
+        '  </h3>' +
+        '  <p class="text-secondary" style="font-size: 13px; margin-bottom: var(--space-4);">An automated capability analysis checking thresholds, HRA compliance, carry-forward rules, and advance tax mandates.</p>' +
+        '  <div id="dashboard-audit-checks" class="audit-checks-container"></div>' +
         '</div>';
 
       el.innerHTML = dashboardHTML;
@@ -938,6 +946,44 @@
             '  <div class="opt-footer"><span>Deadline: <strong>' + sugg.deadline + '</strong></span></div>' +
             '</div>';
           optsContainer.appendChild(optCard);
+        }
+      }
+
+      // Render Audit & Compliance Checks
+      var auditContainer = el.querySelector('#dashboard-audit-checks');
+      if (auditContainer) {
+        var auditChecks = window.TaxAuditor.runAudit(state, taxResult);
+        if (auditChecks.length === 0) {
+          auditContainer.innerHTML = 
+            '<div style="padding: var(--space-4); text-align: center; color: var(--color-success-500); font-weight: var(--font-weight-medium);">' +
+            '  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 18px; height: 18px; color: var(--color-success-500); display: inline-block; vertical-align: middle; margin-right: 6px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>' +
+            '  Compliance Audit Passed: All inputs align with standard rules under the Income Tax Act, 1961. No audit flags or warning alerts detected.' +
+            '</div>';
+        } else {
+          var auditHTML = '';
+          for (var i = 0; i < auditChecks.length; i++) {
+            var check = auditChecks[i];
+            var iconSVG = '';
+            
+            if (check.type === 'danger') {
+              iconSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px; color: var(--color-error);"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>';
+            } else if (check.type === 'warning') {
+              iconSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px; color: var(--color-warning);"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376C1.83 19.126 2.914 21 4.645 21h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z" /></svg>';
+            } else {
+              iconSVG = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px; color: var(--color-primary);"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 1 1 1.053.92l-.44 1.543a.75.75 0 0 0 .952.921l.044-.022M12 7.51h.008v.008H12v-.008ZM12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z" /></svg>';
+            }
+
+            auditHTML += 
+              '<div class="audit-check-card ' + check.type + ' animate-scale-in">' +
+              '  <div class="audit-check-title">' +
+              '    <span>' + iconSVG + '</span>' +
+              '    <span>' + check.title + '</span>' +
+              '  </div>' +
+              '  <div class="audit-check-message">' + check.message + '</div>' +
+              '  <div class="audit-check-action"><strong>Next Step:</strong> ' + check.action + '</div>' +
+              '</div>';
+          }
+          auditContainer.innerHTML = auditHTML;
         }
       }
     },

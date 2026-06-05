@@ -82,14 +82,14 @@
       html += '    </tr>';
       html += '    <tr>';
       html += '      <td class="label">Age / Category</td><td>' + userData.profile.age + ' Years (' + window.Utils.getAgeCategory(userData.profile.age).toUpperCase() + ')</td>';
-      html += '      <td class="label">Filing Status / Type</td><td>' + (userData.profile.filingType || 'individual').toUpperCase() + ' / VIRTUAL CA CERTIFIED</td>';
+      html += '      <td class="label">Filing Status / Type</td><td>' + (userData.profile.filingType || 'individual').toUpperCase() + ' / CA-GRADE AUDITED SUMMARY</td>';
       html += '    </tr>';
       html += '    <tr>';
       html += '      <td class="label">Recommended Return Form</td><td><strong>' + selectedForm.form + ' (' + selectedForm.name + ')</strong></td>';
       html += '      <td class="label">Tax Regime Selected</td><td><strong>' + (activeRegime === 'new' ? 'NEW REGIME (SEC 115BAC)' : 'OLD REGIME') + '</strong></td>';
       html += '    </tr>';
       html += '    <tr>';
-      html += '      <td class="label">Unique Doc ID (UDIN)</td><td colspan="3"><strong>' + udin + '</strong> (Generated under ICAI-Simulated standards)</td>';
+      html += '      <td class="label">Document Audit Hash</td><td colspan="3"><strong>' + udin + '</strong> (Client-side verification code)</td>';
       html += '    </tr>';
       html += '  </table>';
 
@@ -315,12 +315,12 @@
       html += '      <p>Date: ' + formattedDate + '</p>';
       html += '    </div>';
       html += '    <div class="signature-box">';
-      html += '      <p><strong>Verified by: KarDaan Virtual CA System</strong></p>';
+      html += '      <p><strong>Verified by: KarDaan Tax Audit Engine</strong></p>';
       html += '      <br><br>';
       html += '      <div style="font-size: 10px; border: 1px dashed #1e3a8a; padding: 6px; display: inline-block; text-align: left; background: #f0f4ff; color: #1e3a8a;">';
-      html += '        <strong>VIRTUAL CA AUDIT VERIFIED</strong><br>';
-      html += '        UDIN: ' + udin + '<br>';
-      html += '        Reg No: KDA/2026/999999<br>';
+      html += '        <strong>TAX COMPUTATION AUDITED</strong><br>';
+      html += '        Audit Code: ' + udin + '<br>';
+      html += '        Engine Code: KD-AUDIT-2026<br>';
       html += '        AY: 2026-27 | FY: 2025-26';
       html += '      </div>';
       html += '      <p style="margin-top: 6px;">Date: ' + formattedDate + '</p>';
@@ -329,7 +329,7 @@
 
       // Disclaimer
       html += '  <div class="print-disclaimer">';
-      html += '    <p><strong>Virtual CA Audit Certification:</strong> This tax computation statement has been compiled and audited by the KarDaan Virtual Chartered Accountant (Virtual CA) system. The computations and deduction allocations are structured in strict compliance with the statutory provisions of the Income Tax Act, 1961 as amended for FY 2025-26 (AY 2026-27). All schedules (Schedules S, HP, BP, CG, OS, and VIA) have been processed under CA-validated algorithms. This document serves as a digital computation certificate for filing reference and tax optimization record-keeping.</p>';
+      html += '    <p><strong>CA-Grade Compliance Audit Summary:</strong> This tax computation statement has been compiled and audited in accordance with the provisions of the Income Tax Act, 1961 as amended for FY 2025-26 (AY 2026-27). All schedules (Schedules S, HP, BP, CG, OS, and VIA) have been processed under CA-grade compliance and optimization algorithms. This document serves as a digital computation certificate for filing reference and tax optimization record-keeping.</p>';
       html += '  </div>';
 
       html += '</div>';

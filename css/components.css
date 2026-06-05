@@ -898,3 +898,75 @@
   font-size: var(--font-size-xs);
   color: var(--text-tertiary);
 }
+
+/* CA Audit Compliance Cards */
+.audit-checks-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.audit-check-card {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--border-primary);
+  background: var(--bg-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.audit-check-card.danger {
+  border-left-color: var(--color-error);
+  background: rgba(244, 63, 94, 0.04);
+}
+
+.audit-check-card.warning {
+  border-left-color: var(--color-warning);
+  background: rgba(245, 158, 11, 0.04);
+}
+
+.audit-check-card.info {
+  border-left-color: var(--color-primary);
+  background: rgba(79, 70, 229, 0.04);
+}
+
+.audit-check-title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.audit-check-card.danger .audit-check-title {
+  color: #fda4af;
+}
+
+.audit-check-card.warning .audit-check-title {
+  color: #fde047;
+}
+
+.audit-check-card.info .audit-check-title {
+  color: #a5b4fc;
+}
+
+.audit-check-message {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.audit-check-action {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  padding: var(--space-1-5) var(--space-3);
+  border-radius: var(--radius-md);
+  display: inline-block;
+  align-self: flex-start;
+}
+
