@@ -854,7 +854,8 @@
     },
 
     render_review: function (el) {
-      var heads = window.TaxEngine.computeGrossIncome(state.income, 'new', 'below60', state.profile.filingType).heads;
+      var ageCategory = window.Utils.getAgeCategory(Number(state.profile.age || 30));
+      var heads = window.TaxEngine.computeGrossIncome(state.income, 'new', ageCategory, state.profile.filingType).heads;
       
       var totalDeds = 0;
       var d = state.deductions || {};

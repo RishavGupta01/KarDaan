@@ -244,7 +244,7 @@
       }
 
       // 2. Salary Income
-      if (userData.selectedIncomes && userData.selectedIncomes.salary && userData.income.salary) {
+      if (userData.income && userData.income.salary) {
         var sal = userData.income.salary;
         if (sal.grossSalary > 0) {
           rows.push({
@@ -294,7 +294,7 @@
       }
 
       // 3. House Property Income
-      if (userData.selectedIncomes && userData.selectedIncomes.property && userData.income.houseProperty && userData.income.houseProperty.length > 0) {
+      if (userData.income && userData.income.houseProperty && userData.income.houseProperty.length > 0) {
         for (var i = 0; i < userData.income.houseProperty.length; i++) {
           var prop = userData.income.houseProperty[i];
           var propLabel = 'Property #' + (i + 1) + ' (' + (prop.type === 'selfOccupied' ? 'Self Occupied' : 'Let Out') + ')';
@@ -331,7 +331,7 @@
       }
 
       // 4. Capital Gains
-      if (userData.selectedIncomes && userData.selectedIncomes.gains && userData.income.capitalGains) {
+      if (userData.income && userData.income.capitalGains) {
         var cg = userData.income.capitalGains;
         if (cg.listed) {
           if (cg.listed.stcg !== 0) {
@@ -426,7 +426,7 @@
       }
 
       // 5. Business Income
-      if (userData.selectedIncomes && userData.selectedIncomes.business && userData.income.business) {
+      if (userData.income && userData.income.business) {
         var biz = userData.income.business;
         if (biz.type !== 'none') {
           rows.push({
@@ -469,7 +469,7 @@
       }
 
       // 6. Other Sources
-      if (userData.selectedIncomes && userData.selectedIncomes.other && userData.income.otherSources) {
+      if (userData.income && userData.income.otherSources) {
         var os = userData.income.otherSources;
         if (os.savingsInterest > 0) {
           rows.push({
@@ -1367,7 +1367,7 @@
       
       var auditChecks = window.TaxAuditor.runAudit(userData, taxResult);
       if (auditChecks.length === 0) {
-        html += '        <tr><td colspan="4" class="text-center" style="color: #15803d; font-weight: bold;">✓ COMPLIANCE PASSED: No audit flags or warning alerts detected. All inputs align with standard rules under the Income Tax Act, 1961.</td></tr>';
+        html += '        <tr><td colspan="4"><div class="compliance-passed-container">✓ COMPLIANCE PASSED: No audit flags or warning alerts detected. All inputs align with standard rules under the Income Tax Act, 1961.</div></td></tr>';
       } else {
         for (var j = 0; j < auditChecks.length; j++) {
           var check = auditChecks[j];
@@ -1437,29 +1437,30 @@
       var printStyle = document.createElement('style');
       printStyle.id = 'temp-print-style';
       printStyle.innerHTML = 
-        '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");' +
+        '@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");' +
         '@media print {' +
         '  body > *:not(#temp-print-div) { display: none !important; }' +
         '  #temp-print-div, #temp-print-div * { display: revert; }' +
         '  #temp-print-div { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }' +
-        '  .print-report { padding: 25px; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #0f172a; background: #fff; line-height: 1.5; max-width: 920px; margin: 0 auto; font-size: 10px; }' +
+        '  .print-report { padding: 40px; font-family: "Plus Jakarta Sans", sans-serif !important; color: #0f172a; background: #fff; line-height: 1.5; max-width: 920px; margin: 0 auto; font-size: 10px; }' +
         '  .print-header { display: flex !important; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 25px; }' +
-        '  .print-header h1 { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }' +
+        '  .print-header h1 { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }' +
         '  .print-header p { margin: 4px 0 0 0; font-size: 9px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #64748b; }' +
         '  .audit-meta-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background-color: #fff; }' +
         '  .audit-meta-table td { padding: 6px 10px; font-size: 9px; border: 1px solid #e2e8f0; vertical-align: middle; color: #334155; }' +
         '  .audit-meta-table td.label { font-weight: 700; background: #f1f5f9; width: 22%; text-transform: uppercase; font-size: 8px; letter-spacing: 0.5px; color: #64748b; }' +
         '  .print-section { margin-bottom: 28px; page-break-inside: avoid; }' +
-        '  .print-section h2 { font-size: 13px; font-weight: 700; margin-top: 0; margin-bottom: 12px; border-left: 3px solid #0f172a; padding-left: 8px; text-transform: uppercase; color: #0f172a; letter-spacing: 0.5px; border-bottom: none !important; }' +
-        '  .print-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 5px; }' +
-        '  .print-table th { background: #0f172a; color: #ffffff !important; border-top: none; border-left: none; border-right: none; border-bottom: 2px solid #0f172a; padding: 7px 10px; font-size: 8px; text-align: left; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }' +
-        '  .print-table td { border-top: none; border-left: none; border-right: none; border-bottom: 1px solid #e2e8f0; padding: 7px 10px; font-size: 9px; vertical-align: middle; color: #334155; }' +
+        '  .print-section h2 { font-size: 12px; font-weight: 700; margin-top: 24px; margin-bottom: 12px; border-left: 4px solid #3b82f6; padding: 6px 12px; text-transform: uppercase; color: #1e40af; background: #f1f5f9; letter-spacing: 0.05em; border-bottom: none !important; }' +
+        '  .print-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 16px; }' +
+        '  .print-table th { background: #0f172a !important; color: #ffffff !important; border-top: none; border-left: none; border-right: none; border-bottom: 2px solid #0f172a; padding: 8px 12px; font-size: 10px; text-align: left; text-transform: uppercase; font-weight: 600; }' +
+        '  .print-table td { border-top: none; border-left: none; border-right: none; border-bottom: 1px solid #e2e8f0; padding: 10px 12px; font-size: 11px; vertical-align: middle; color: #334155; }' +
+        '  .print-table tbody tr:nth-child(even) { background-color: #f8fafc; }' +
         '  .print-table tr:nth-child(even) td { background-color: #f8fafc; }' +
-        '  .total-row td { font-weight: 700; background: #f1f5f9 !important; color: #0f172a !important; border-top: 1.5px solid #0f172a; border-bottom: 1.5px solid #0f172a; }' +
-        '  .double-total-row td { font-weight: 700; font-size: 10px; background: #e2e8f0 !important; color: #0f172a !important; border-top: 1.5px solid #0f172a; border-bottom: 3px double #0f172a !important; }' +
+        '  .total-row td { background-color: #f0f4ff !important; font-weight: 700; border-top: 2px solid #1e3a8a !important; border-bottom: 2px solid #1e3a8a !important; color: #1e3a8a !important; }' +
+        '  .double-total-row td { font-weight: 700; font-size: 11px; background: #f0f4ff !important; color: #1e3a8a !important; border-top: 2px solid #1e3a8a !important; border-bottom: 4px double #1e3a8a !important; }' +
         '  .balance-due-row td { font-weight: 700; color: #991b1b !important; background: #fef2f2 !important; border: 1.5px solid #fca5a5 !important; }' +
         '  .refund-due-row td { font-weight: 700; color: #166534 !important; background: #f0fdf4 !important; border: 1.5px solid #bbf7d0 !important; }' +
-        '  .sub-row td { font-size: 8px; color: #64748b; padding-left: 20px; border-top: none; }' +
+        '  .sub-row td { font-size: 9px; color: #64748b; padding-left: 20px; border-top: none; }' +
         '  .text-right { text-align: right !important; }' +
         '  .text-center { text-align: center !important; }' +
         '  .text-success { color: #166534 !important; }' +
@@ -1470,6 +1471,7 @@
         '  .status-badge { display: inline-block; padding: 2px 6px; font-size: 7px; font-weight: 700; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 6px; vertical-align: middle; }' +
         '  .status-disallowed { background-color: #FEF3C7 !important; color: #92400E !important; }' +
         '  .status-allowed { background-color: #D1FAE5 !important; color: #065F46 !important; }' +
+        '  .compliance-passed-container { background-color: #d1fae5 !important; color: #065f46 !important; padding: 12px; border-radius: 6px; font-weight: 600; font-size: 11px; display: flex; align-items: center; border: 1px solid #a7f3d0; }' +
         '  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }' +
         '}';
       document.head.appendChild(printStyle);
