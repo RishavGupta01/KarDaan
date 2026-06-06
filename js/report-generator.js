@@ -244,7 +244,7 @@
       }
 
       // 2. Salary Income
-      if (userData.selectedIncomes.salary && userData.income.salary) {
+      if (userData.selectedIncomes && userData.selectedIncomes.salary && userData.income.salary) {
         var sal = userData.income.salary;
         if (sal.grossSalary > 0) {
           rows.push({
@@ -294,7 +294,7 @@
       }
 
       // 3. House Property Income
-      if (userData.selectedIncomes.property && userData.income.houseProperty && userData.income.houseProperty.length > 0) {
+      if (userData.selectedIncomes && userData.selectedIncomes.property && userData.income.houseProperty && userData.income.houseProperty.length > 0) {
         for (var i = 0; i < userData.income.houseProperty.length; i++) {
           var prop = userData.income.houseProperty[i];
           var propLabel = 'Property #' + (i + 1) + ' (' + (prop.type === 'selfOccupied' ? 'Self Occupied' : 'Let Out') + ')';
@@ -331,7 +331,7 @@
       }
 
       // 4. Capital Gains
-      if (userData.selectedIncomes.gains && userData.income.capitalGains) {
+      if (userData.selectedIncomes && userData.selectedIncomes.gains && userData.income.capitalGains) {
         var cg = userData.income.capitalGains;
         if (cg.listed) {
           if (cg.listed.stcg !== 0) {
@@ -426,7 +426,7 @@
       }
 
       // 5. Business Income
-      if (userData.selectedIncomes.business && userData.income.business) {
+      if (userData.selectedIncomes && userData.selectedIncomes.business && userData.income.business) {
         var biz = userData.income.business;
         if (biz.type !== 'none') {
           rows.push({
@@ -469,7 +469,7 @@
       }
 
       // 6. Other Sources
-      if (userData.selectedIncomes.other && userData.income.otherSources) {
+      if (userData.selectedIncomes && userData.selectedIncomes.other && userData.income.otherSources) {
         var os = userData.income.otherSources;
         if (os.savingsInterest > 0) {
           rows.push({

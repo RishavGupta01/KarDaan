@@ -53,8 +53,9 @@
      * @param {string} ageCategory - 'below60' | 'senior' | 'superSenior'
      * @returns {Object} Head-wise and gross income
      */
-    computeGrossIncome: function (incomeData, regime, ageCategory) {
-      var salaryGross = incomeData.salary ? Number(incomeData.salary.grossSalary || 0) : 0;
+    computeGrossIncome: function (incomeData, regime, ageCategory, filingType) {
+      var isNonIndividual = (filingType === 'company' || filingType === 'firm' || filingType === 'llp');
+      var salaryGross = (!isNonIndividual && incomeData.salary) ? Number(incomeData.salary.grossSalary || 0) : 0;
       
       // Calculate standard deduction
       var stdDeductionLimit = regime === 'new' ? TD.newRegime.standardDeduction : TD.oldRegime.standardDeduction;
@@ -71,7 +72,7 @@
           var munTax = Number(prop.municipalTax || 0);
           var netAnnualValue = Math.max(0, annualRent - munTax);
           
-          var stdDedHP = prop.type === 'letOut' ? netAnnualValue * 0.30 : 0;
+          var stdDedHP = prop.type === 'letOut' ? Math.round(netAnnualValue * 0.30) : 0;
           var loanInterest = Number(prop.interestOnLoan || 0);
           
           var netPropIncome = 0;
@@ -333,7 +334,7 @@
      * @param {string} ageCategory
      * @returns {Object} Section-wise deductions and total
      */
-    computeDeductionsOldRegime: function (deductionsData, incomeHeads, ageCategory) {
+    computeDeductionsOldRegime: function (deductionsData, incomeHeads, ageCategory, filingType) {
       var results = {};
       var total = 0;
 
@@ -343,19 +344,16 @@
                        Number(deductionsData['80CCC'] || 0) + 
                        Number(deductionsData['80CCD1'] || 0);
       results['80C'] = Math.min(claimed80C, limit80C);
-      total += results['80C'];
 
       // 2. 80CCD(1B) NPS limit (50K)
       var claimed80CCD1B = Number(deductionsData['80CCD1B'] || 0);
       results['80CCD1B'] = Math.min(claimed80CCD1B, TD.deductions['80CCD1B'].limit);
-      total += results['80CCD1B'];
 
       // 3. 80CCD(2) Employer NPS - 10% of (Basic + DA) under old regime
       var claimed80CCD2 = Number(deductionsData['80CCD2'] || 0);
       var basicPlusDA = Number(deductionsData.basicPlusDA || 0);
       var limit80CCD2 = basicPlusDA * TD.deductions['80CCD2'].limitPercent;
       results['80CCD2'] = Math.min(claimed80CCD2, limit80CCD2);
-      total += results['80CCD2'];
 
       // 4. 80D Medical Insurance
       var selfLimit = ageCategory !== 'below60' ? TD.deductions['80D'].selfSeniorLimit : TD.deductions['80D'].selfLimit;
@@ -363,13 +361,10 @@
       
       var claimed80D_self = Number(deductionsData['80D_self'] || 0);
       var claimed80D_parents = Number(deductionsData['80D_parents'] || 0);
-      
       results['80D'] = Math.min(claimed80D_self, selfLimit) + Math.min(claimed80D_parents, parentsLimit);
-      total += results['80D'];
 
       // 5. 80E Education loan interest
       results['80E'] = Number(deductionsData['80E'] || 0);
-      total += results['80E'];
 
       // 6. 80TTA / 80TTB
       var claimedTTA = Number(deductionsData['80TTA'] || 0);
@@ -377,11 +372,9 @@
         // Senior citizens get 80TTB on both savings and FD interest up to 1L
         var claimedTTB = Number(deductionsData['80TTB'] || 0);
         results['80TTB'] = Math.min(claimedTTB, TD.deductions['80TTB'].limit);
-        total += results['80TTB'];
       } else {
         // Non-seniors get 80TTA on savings interest up to 10k
         results['80TTA'] = Math.min(claimedTTA, TD.deductions['80TTA'].limit);
-        total += results['80TTA'];
       }
 
       // 7. 80GG Rent Paid (if no HRA)
@@ -391,9 +384,7 @@
         var comp1 = TD.deductions['80GG'].monthlyLimit * 12; // 60,000
         var comp2 = totalIncome * TD.deductions['80GG'].percentLimit;
         var comp3 = Math.max(0, rentPaid - (totalIncome * 0.10));
-        
         results['80GG'] = Math.min(comp1, comp2, comp3);
-        total += results['80GG'];
       }
 
       // 8. Other deductions (80G, 80U, etc.)
@@ -402,7 +393,27 @@
       results['80DD'] = Number(deductionsData['80DD'] || 0);
       results['80DDB'] = Number(deductionsData['80DDB'] || 0);
 
-      total += results['80G'] + results['80U'] + results['80DD'] + results['80DDB'];
+      // Auto-block individual deductions for corporate/partnership/LLP entities
+      if (filingType === 'company' || filingType === 'firm' || filingType === 'llp') {
+        results['80C'] = 0;
+        results['80CCD1B'] = 0;
+        results['80CCD2'] = 0;
+        results['80D'] = 0;
+        results['80E'] = 0;
+        if ('80TTA' in results) results['80TTA'] = 0;
+        if ('80TTB' in results) results['80TTB'] = 0;
+        if ('80GG' in results) results['80GG'] = 0;
+        results['80U'] = 0;
+        results['80DD'] = 0;
+        results['80DDB'] = 0;
+      }
+
+      // Sum final deductions
+      for (var key in results) {
+        if (results.hasOwnProperty(key)) {
+          total += results[key];
+        }
+      }
 
       return {
         breakdown: results,
@@ -466,12 +477,14 @@
       var totalTds = salaryTds + Number(paid.tds || 0);
       var advanceTaxPaid = Number(paid.advanceTax || 0);
 
+      var filingType = userData.profile ? (userData.profile.filingType || 'individual') : 'individual';
+
       // 1. COMPUTE NEW TAX REGIME
-      var newGross = this.computeGrossIncome(userData.income, 'new', ageCategory);
+      var newGross = this.computeGrossIncome(userData.income, 'new', ageCategory, filingType);
       var newDeductions = 0;
       
       // Employer NPS is allowed in new regime (14% limit)
-      if (userData.deductions && userData.deductions['80CCD2']) {
+      if (userData.deductions && userData.deductions['80CCD2'] && filingType !== 'company' && filingType !== 'firm' && filingType !== 'llp') {
         var basicPlusDA = Number(userData.deductions.basicPlusDA || 0);
         var claimed80CCD2 = Number(userData.deductions['80CCD2'] || 0);
         var limit80CCD2New = basicPlusDA * 0.14; // 14% for new regime
@@ -520,8 +533,8 @@
       var finalNewNetTax = newNetTax + newInterest.totalInterest;
 
       // 2. COMPUTE OLD TAX REGIME
-      var oldGross = this.computeGrossIncome(userData.income, 'old', ageCategory);
-      var oldDeductionsResult = this.computeDeductionsOldRegime(userData.deductions || {}, oldGross.heads, ageCategory);
+      var oldGross = this.computeGrossIncome(userData.income, 'old', ageCategory, filingType);
+      var oldDeductionsResult = this.computeDeductionsOldRegime(userData.deductions || {}, oldGross.heads, ageCategory, filingType);
       
       var oldTaxableSlabIncome = Math.max(0, (oldGross.heads.salaryNet + oldGross.heads.hpSetOff + oldGross.heads.business + oldGross.heads.otherSources + oldGross.heads.stcgSlab) - oldDeductionsResult.total);
       

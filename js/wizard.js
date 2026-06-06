@@ -339,19 +339,42 @@
     },
 
     render_sources: function (el) {
+      var isIndiv = (state.profile.filingType === 'individual');
+      if (!isIndiv) {
+        state.selectedIncomes.salary = false;
+        state.income.salary = { basic: 0, da: 0, hra: 0, specialAllowance: 0, grossSalary: 0, tds: 0 };
+      }
+      
+      var salaryCardHtml = '';
+      if (isIndiv) {
+        salaryCardHtml = 
+          '  <div class="option-card ' + (state.selectedIncomes.salary ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
+          '    <span class="option-icon">' +
+          '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
+          '        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875A1.125 1.125 0 0 1 3.75 18.4v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.45.258-.717.258H4.875a1.002 1.002 0 0 1-.717-.258m16.5 0c.29-.247.467-.61.467-.99V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m0 0V5.25c0-1.03-.83-1.875-1.875-1.875H10.5C9.455 3.375 8.625 4.205 8.625 5.25v1.281m8.625 0a48.112 48.112 0 0 1-8.625 0m0 0A48.114 48.114 0 0 0 5.213 6.531C4.144 6.69 3.375 7.625 3.375 8.706v4.783c0 .38.177.744.467.99m0 0a2.18 2.18 0 0 1 .717-.258H19.5" />' +
+          '      </svg>' +
+          '    </span>' +
+          '    <span class="option-title">Salaried / Pensioner</span>' +
+          '    <span class="option-desc">Receives Form 16, standard deductions.</span>' +
+          '  </div>';
+      } else {
+        salaryCardHtml = 
+          '  <div class="option-card disabled" style="opacity: 0.55; cursor: not-allowed; border: 1px dashed var(--border-color); background: rgba(0,0,0,0.02);">' +
+          '    <span class="option-icon">' +
+          '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--text-tertiary);">' +
+          '        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />' +
+          '      </svg>' +
+          '    </span>' +
+          '    <span class="option-title" style="color: var(--text-tertiary);">Salaried / Pensioner</span>' +
+          '    <span class="option-desc" style="color: var(--text-tertiary);">Not applicable for non-individuals.</span>' +
+          '  </div>';
+      }
+
       el.innerHTML = 
         '<h2>2. Income Sources</h2>' +
         '<p class="card-subtitle">Select all applicable sources of income for the year.</p>' +
         '<div class="option-grid grid-3 stagger-children" style="margin-top: 20px;">' +
-        '  <div class="option-card ' + (state.selectedIncomes.salary ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
-        '    <span class="option-icon">' +
-        '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
-        '        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875A1.125 1.125 0 0 1 3.75 18.4v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.45.258-.717.258H4.875a1.002 1.002 0 0 1-.717-.258m16.5 0c.29-.247.467-.61.467-.99V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m0 0V5.25c0-1.03-.83-1.875-1.875-1.875H10.5C9.455 3.375 8.625 4.205 8.625 5.25v1.281m8.625 0a48.112 48.112 0 0 1-8.625 0m0 0A48.114 48.114 0 0 0 5.213 6.531C4.144 6.69 3.375 7.625 3.375 8.706v4.783c0 .38.177.744.467.99m0 0a2.18 2.18 0 0 1 .717-.258H19.5" />' +
-        '      </svg>' +
-        '    </span>' +
-        '    <span class="option-title">Salaried / Pensioner</span>' +
-        '    <span class="option-desc">Receives Form 16, standard deductions.</span>' +
-        '  </div>' +
+        salaryCardHtml +
         '  <div class="option-card ' + (state.selectedIncomes.property ? 'selected' : '') + '" onclick="this.classList.toggle(\'selected\')">' +
         '    <span class="option-icon">' +
         '      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--color-primary-400);">' +
@@ -831,7 +854,7 @@
     },
 
     render_review: function (el) {
-      var heads = window.TaxEngine.computeGrossIncome(state.income, 'new', 'below60').heads;
+      var heads = window.TaxEngine.computeGrossIncome(state.income, 'new', 'below60', state.profile.filingType).heads;
       
       var totalDeds = 0;
       var d = state.deductions || {};
@@ -854,6 +877,54 @@
           if (interest > 0) hasHpInterest = true;
         }
       }
+      
+      var rowsHtml = '';
+      rowsHtml += '        <tr><td><strong>Profile</strong></td><td>Name: ' + (state.profile.name || 'N/A') + ' | Age: ' + state.profile.age + ' (' + state.profile.filingType.toUpperCase() + ')</td><td>-</td></tr>';
+      
+      if (state.selectedIncomes.salary && state.income.salary) {
+        rowsHtml += '        <tr><td><strong>Salary</strong></td><td>Gross Salary reported</td><td>' + window.Utils.formatCurrency(heads.salaryGross) + '</td></tr>';
+        if (state.income.salary.hra > 0) {
+          rowsHtml += '        <tr><td><strong>Salary HRA</strong></td><td>House Rent Allowance Exemption <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span></td><td>' + window.Utils.formatCurrency(state.income.salary.hra) + '</td></tr>';
+        }
+      }
+      
+      if (state.selectedIncomes.property) {
+        rowsHtml += '        <tr><td><strong>Properties</strong></td><td>Owned HP Interest/Income' + (hasHpInterest ? ' <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span>' : '') + '</td><td>' + window.Utils.formatCurrency(rawHpVal) + '</td></tr>';
+      }
+      
+      if (state.selectedIncomes.gains) {
+        rowsHtml += '        <tr><td><strong>Capital Gains</strong></td><td>STCG + LTCG portfolio net</td><td>' + window.Utils.formatCurrency(heads.stcg + heads.ltcg) + '</td></tr>';
+      }
+      
+      if (state.selectedIncomes.business) {
+        rowsHtml += '        <tr><td><strong>Business</strong></td><td>Presumptive or Regular</td><td>' + window.Utils.formatCurrency(heads.business) + '</td></tr>';
+      }
+      
+      if (state.selectedIncomes.other) {
+        rowsHtml += '        <tr><td><strong>Other Sources</strong></td><td>Savings / FDs / Dividends</td><td>' + window.Utils.formatCurrency(heads.otherSources) + '</td></tr>';
+      }
+      
+      if (state.deductions['80C'] > 0) {
+        rowsHtml += '        <tr><td><strong>Section 80C</strong></td><td>Life Insurance, ELSS, PPF, etc. <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span></td><td>' + window.Utils.formatCurrency(state.deductions['80C']) + '</td></tr>';
+      }
+      if (state.deductions['80D_self'] > 0 || state.deductions['80D_parents'] > 0) {
+        var val80D = Number(state.deductions['80D_self'] || 0) + Number(state.deductions['80D_parents'] || 0);
+        rowsHtml += '        <tr><td><strong>Section 80D</strong></td><td>Health Insurance Premium <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span></td><td>' + window.Utils.formatCurrency(val80D) + '</td></tr>';
+      }
+      if (state.deductions['80CCD1B'] > 0) {
+        rowsHtml += '        <tr><td><strong>Section 80CCD(1B)</strong></td><td>Voluntary NPS Contribution <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span></td><td>' + window.Utils.formatCurrency(state.deductions['80CCD1B']) + '</td></tr>';
+      }
+      if (state.deductions['80E'] > 0) {
+        rowsHtml += '        <tr><td><strong>Section 80E</strong></td><td>Education Loan Interest <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span></td><td>' + window.Utils.formatCurrency(state.deductions['80E']) + '</td></tr>';
+      }
+      if (state.deductions['80G'] > 0) {
+        rowsHtml += '        <tr><td><strong>Section 80G</strong></td><td>Donations <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span></td><td>' + window.Utils.formatCurrency(state.deductions['80G']) + '</td></tr>';
+      }
+      if (state.deductions['80CCD2'] > 0) {
+        rowsHtml += '        <tr><td><strong>Section 80CCD(2)</strong></td><td>Employer NPS Contribution <span style="font-size: 10px; margin-left: 8px; color: var(--color-success-500); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Allowed under New Regime</span></td><td>' + window.Utils.formatCurrency(state.deductions['80CCD2']) + '</td></tr>';
+      }
+      
+      rowsHtml += '        <tr style="border-top: 2px solid var(--border-color);"><td><strong>Total Declared Deductions</strong></td><td>Chapter VI-A Total savings</td><td><strong>' + window.Utils.formatCurrency(totalDeds) + '</strong></td></tr>';
 
       el.innerHTML = 
         '<h2>10. Review Details</h2>' +
@@ -863,13 +934,7 @@
         '    <table class="table">' +
         '      <thead><tr><th>Category</th><th>Details</th><th>Gross Amount</th></tr></thead>' +
         '      <tbody>' +
-        '        <tr><td><strong>Profile</strong></td><td>Name: ' + (state.profile.name || 'N/A') + ' | Age: ' + state.profile.age + '</td><td>-</td></tr>' +
-        (state.selectedIncomes.salary ? '        <tr><td><strong>Salary</strong></td><td>Gross Salary reported</td><td>' + window.Utils.formatCurrency(heads.salaryGross) + '</td></tr>' : '') +
-        (state.selectedIncomes.property ? '        <tr><td><strong>Properties</strong></td><td>Owned HP Interest/Income' + (hasHpInterest ? ' <span style="font-size: 10px; margin-left: 8px; color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 500;">Disallowed under New Regime</span>' : '') + '</td><td>' + window.Utils.formatCurrency(rawHpVal) + '</td></tr>' : '') +
-        (state.selectedIncomes.gains ? '        <tr><td><strong>Capital Gains</strong></td><td>STCG + LTCG portfolio net</td><td>' + window.Utils.formatCurrency(heads.stcg + heads.ltcg) + '</td></tr>' : '') +
-        (state.selectedIncomes.business ? '        <tr><td><strong>Business</strong></td><td>Presumptive or Regular</td><td>' + window.Utils.formatCurrency(heads.business) + '</td></tr>' : '') +
-        (state.selectedIncomes.other ? '        <tr><td><strong>Other Sources</strong></td><td>Savings / FDs / Dividends</td><td>' + window.Utils.formatCurrency(heads.otherSources) + '</td></tr>' : '') +
-        '        <tr><td><strong>Deductions</strong></td><td>Section claimed savings (80C, 80D, NPS etc.)</td><td>' + window.Utils.formatCurrency(totalDeds) + '</td></tr>' +
+        rowsHtml +
         '      </tbody>' +
         '    </table>' +
         '  </div>' +
